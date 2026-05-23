@@ -32,6 +32,16 @@ function togglePassword() {
 
             // Simulate API call
             setTimeout(() => {
+                // Save user details
+                const emailInput = document.getElementById('email').value;
+                if(emailInput) {
+                    const namePart = emailInput.split('@')[0];
+                    // Format name: capitalize first letter, replace dots/underscores with space
+                    const formattedName = namePart.replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    localStorage.setItem('farmerName', formattedName);
+                    localStorage.setItem('farmerEmail', emailInput);
+                }
+
                 btn.innerHTML = originalContent;
                 btn.classList.remove('opacity-90', 'cursor-not-allowed');
                 

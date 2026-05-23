@@ -55,8 +55,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const isKannada = localStorage.getItem('translateToKannada') === 'true';
-            if (isKannada) {
+            const currentLanguage = localStorage.getItem('appLanguage') || 'en';
+            if (currentLanguage === 'kn') {
                 document.querySelector('input[value="kn"]').checked = true;
             } else {
                 document.querySelector('input[value="en"]').checked = true;
@@ -65,10 +65,8 @@
 
         function setLanguage(lang) {
             if (lang === 'kn') {
-                localStorage.setItem('translateToKannada', 'true');
                 if (typeof translateToKannada === 'function') translateToKannada();
             } else {
-                localStorage.setItem('translateToKannada', 'false');
                 if (typeof translateToEnglish === 'function') translateToEnglish();
             }
         }

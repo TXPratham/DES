@@ -33,12 +33,18 @@
                 <p class="text-earthy/70 mt-1 max-w-2xl">Real-time alerts and crop planning suggestions based on hyper-local temperature, humidity, and rainfall forecasts.</p>
             </div>
             
+            <div class="flex items-center gap-4">
+                <button id="enable-voice-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl shadow-sm font-bold text-sm flex items-center gap-2 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M10 11l-3 3H4v-4h3l3 3v4z"></path></svg>
+                    <span class="btn-text">Enable Voice Alerts</span>
+                </button>
             <div class="bg-white px-4 py-3 rounded-xl shadow-sm border border-gray-100 flex items-center gap-3">
                 <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                 <div>
                     <p class="text-xs font-bold text-gray-500 uppercase">Current Location</p>
                     <p class="text-sm font-extrabold text-gray-800">Ramanagara, Karnataka</p>
                 </div>
+            </div>
             </div>
         </header>
 
@@ -202,6 +208,69 @@
         </div>
 
     </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const enableVoiceBtn = document.getElementById('enable-voice-btn');
+            let voiceEnabled = false;
+
+            enableVoiceBtn.addEventListener('click', () => {
+                if (!voiceEnabled) {
+                    voiceEnabled = true;
+                    enableVoiceBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                    enableVoiceBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+                    enableVoiceBtn.querySelector('.btn-text').innerText = 'Voice Alerts Active';
+                    triggerVoiceAlert();
+                } else {
+                    voiceEnabled = false;
+                    enableVoiceBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                    enableVoiceBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                    enableVoiceBtn.querySelector('.btn-text').innerText = 'Enable Voice Alerts';
+                    window.speechSynthesis.cancel();
+                }
+            });
+
+            function triggerVoiceAlert() {
+                if (!voiceEnabled || !('speechSynthesis' in window)) return;
+                
+                // Read from DOM (simulated real-time data)
+                const temp = 35.2; 
+                const humidity = 42;
+                
+                const currentLang = localStorage.getItem('selectedLanguage') || 'en';
+
+                let message = "";
+                
+                if (temp > 34) {
+                    if (currentLang === 'kn') {
+                        message = "ಗಮನಿಸಿ. ತಾಪಮಾನ 34 ಡಿಗ್ರಿ ಮೀರಿದೆ. ಚಾಕಿ ಹುಳುಗಳಿಗೆ ಇದು ಸೂಕ್ತವಲ್ಲ. ದಯವಿಟ್ಟು ತಂಪಾಗಿಸುವ ಕ್ರಮಗಳನ್ನು ಕೈಗೊಳ್ಳಿ.";
+                    } else {
+                        message = "Critical Alert. Temperature has exceeded 34 degrees celsius. This is unsuitable for Chawki rearing. Please implement cooling measures.";
+                    }
+                } else if (humidity < 50) {
+                     if (currentLang === 'kn') {
+                        message = "ಗಮನಿಸಿ. ಆರ್ದ್ರತೆ ಶೇಕಡಾ 50 ಕ್ಕಿಂತ ಕಡಿಮೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ಆರ್ದ್ರತೆಯನ್ನು ಹೆಚ್ಚಿಸಲು ಕ್ರಮಗಳನ್ನು ಕೈಗೊಳ್ಳಿ.";
+                    } else {
+                        message = "Alert. Humidity is below 50 percent. Please take measures to increase humidity.";
+                    }
+                }
+                
+                if (message) {
+                    const utterance = new SpeechSynthesisUtterance(message);
+                    if (currentLang === 'kn') {
+                        utterance.lang = 'kn-IN';
+                    } else {
+                        utterance.lang = 'en-IN'; 
+                    }
+                    utterance.rate = 0.9;
+                    window.speechSynthesis.speak(utterance);
+                }
+            }
+            
+            setInterval(() => {
+                if(voiceEnabled) triggerVoiceAlert();
+            }, 30000);
+        });
+    </script>
 </body>
 </html>
 
