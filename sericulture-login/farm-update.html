@@ -189,6 +189,24 @@
     </div>
 
     <script>
+        // Auto-fill from Arduino server
+        async function fetchArduinoData() {
+            try {
+                const res = await fetch('http://localhost:5000/api/data');
+                const data = await res.json();
+                if (data.airTemp !== -999) {
+                    document.getElementById('indoorTemp').value = data.airTemp.toFixed(1);
+                }
+                if (data.airHumidity !== -999) {
+                    document.getElementById('indoorHumidity').value = data.airHumidity.toFixed(1);
+                }
+            } catch (e) {
+                console.log('Arduino server not available:', e);
+            }
+        }
+        // Fetch Arduino data on load
+        fetchArduinoData();
+
         // Set today's date automatically
         document.getElementById('logDate').valueAsDate = new Date();
 

@@ -54,7 +54,7 @@
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-sm font-bold text-gray-500 uppercase">Temperature</p>
-                        <h2 class="text-4xl font-extrabold text-mulberry-dark mt-1">26.5<span
+                        <h2 class="text-4xl font-extrabold text-mulberry-dark mt-1"><span id="arduinoTemp">26.5</span><span
                                 class="text-2xl text-gray-400">°C</span></h2>
                     </div>
                     <div class="p-3 bg-orange-50 rounded-lg text-orange-500">
@@ -87,7 +87,7 @@
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-sm font-bold text-gray-500 uppercase">Humidity</p>
-                        <h2 class="text-4xl font-extrabold text-mulberry-dark mt-1">72<span
+                        <h2 class="text-4xl font-extrabold text-mulberry-dark mt-1"><span id="arduinoHum">72</span><span
                                 class="text-2xl text-gray-400">%</span></h2>
                     </div>
                     <div class="p-3 bg-blue-50 rounded-lg text-blue-500">
@@ -140,7 +140,7 @@
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-sm font-bold text-gray-500 uppercase" data-translate="Soil Moisture">Soil Moisture</p>
-                        <h2 class="text-4xl font-extrabold text-mulberry-dark mt-1">45<span class="text-2xl text-gray-400">%</span></h2>
+                        <h2 class="text-4xl font-extrabold text-mulberry-dark mt-1"><span id="arduinoSoil">45</span><span class="text-2xl text-gray-400">%</span></h2>
                     </div>
                     <div class="p-3 bg-teal-50 rounded-lg text-teal-500">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
@@ -167,6 +167,20 @@
     </main>
 
     <script>
+        // Fetch real-time data from Arduino server
+        function updateArduinoData() {
+            fetch('http://localhost:5000/api/data')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.airTemp !== -999) document.getElementById('arduinoTemp').textContent = data.airTemp.toFixed(1);
+                    if (data.airHumidity !== -999) document.getElementById('arduinoHum').textContent = data.airHumidity.toFixed(1);
+                    if (data.soilMoisture !== -999) document.getElementById('arduinoSoil').textContent = data.soilMoisture;
+                })
+                .catch(e => console.log('Arduino server not available'));
+        }
+        updateArduinoData();
+        setInterval(updateArduinoData, 5000);
+
         // Chart Initialization
         const ctx = document.getElementById('climateChart').getContext('2d');
         new Chart(ctx, {
