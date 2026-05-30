@@ -189,23 +189,23 @@
     </div>
 
     <script>
-        // Auto-fill from Arduino server
-        async function fetchArduinoData() {
+        // Auto-fill from ESP32 server
+        async function fetchESP32Data() {
             try {
-                const res = await fetch('http://localhost:5000/api/data');
+                const res = await fetch('http://10.95.28.62/api/data');
                 const data = await res.json();
-                if (data.airTemp !== -999) {
-                    document.getElementById('indoorTemp').value = data.airTemp.toFixed(1);
+                if (data.temperature !== undefined && data.temperature !== -999) {
+                    document.getElementById('indoorTemp').value = data.temperature.toFixed(1);
                 }
-                if (data.airHumidity !== -999) {
-                    document.getElementById('indoorHumidity').value = data.airHumidity.toFixed(1);
+                if (data.humidity !== undefined && data.humidity !== -999) {
+                    document.getElementById('indoorHumidity').value = data.humidity.toFixed(1);
                 }
             } catch (e) {
-                console.log('Arduino server not available:', e);
+                console.log('ESP32 server not available:', e);
             }
         }
-        // Fetch Arduino data on load
-        fetchArduinoData();
+        // Fetch ESP32 data on load
+        fetchESP32Data();
 
         // Set today's date automatically
         document.getElementById('logDate').valueAsDate = new Date();

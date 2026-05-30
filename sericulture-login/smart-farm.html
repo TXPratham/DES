@@ -171,10 +171,7 @@
                     <i class="ph ph-bank text-xl"></i>
                     <span class="hidden lg:block">Scheme Engine</span>
                 </a>
-                <a href="arduino-dashboard.html" class="nav-item flex items-center gap-4 px-4 py-3 rounded-xl font-semibold text-gray-500 border-l-[3px] border-transparent">
-                    <i class="ph ph-cpu text-xl"></i>
-                    <span class="hidden lg:block">Arduino Server</span>
-                </a>
+
             </nav>
         </div>
 
@@ -212,6 +209,11 @@
                     <span class="text-sm font-bold text-gray-700" id="headerHum">72%</span>
                 </div>
                 
+                <a href="esp32-content.html" class="hidden sm:flex items-center gap-2 bg-mulberry text-white px-4 py-2 rounded-full text-sm font-bold shadow-md hover:bg-mulberry-dark transition-colors cursor-pointer">
+                    <i class="ph ph-cpu text-lg"></i>
+                    <span>ESP Content</span>
+                </a>
+
                 <!-- Enabled Active Notifications Dropdown -->
                 <div class="relative">
                     <button id="notificationBellBtn" class="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-200 shadow-sm text-gray-500 hover:text-mulberry transition-colors relative focus:outline-none">
@@ -1450,6 +1452,35 @@
             climateChart.options.scales.y1.suggestedMax = stage.humMax + 10;
             climateChart.update();
         }
+    </script>
+    <script>
+        async function fetchESP32Data() {
+            try {
+                const response = await fetch('http://10.95.28.62/api/data');
+                const data = await response.json();
+                
+                if (data.dhtOK) {
+                    const headerTempEl = document.getElementById('headerTemp');
+                    const headerHumEl = document.getElementById('headerHum');
+                    const cardTempEl = document.getElementById('cardTemp');
+                    const cardHumEl = document.getElementById('cardHum');
+                    const cardMoistEl = document.getElementById('cardMoist');
+                    
+                    if (headerTempEl && data.airTemp !== null) headerTempEl.textContent = data.airTemp.toFixed(1) + '°C';
+                    if (headerHumEl && data.airHumidity !== null) headerHumEl.textContent = data.airHumidity.toFixed(1) + '%';
+                    
+                    if (cardTempEl && data.airTemp !== null) cardTempEl.textContent = data.airTemp.toFixed(1);
+                    if (cardHumEl && data.airHumidity !== null) cardHumEl.textContent = data.airHumidity.toFixed(1);
+                    if (cardMoistEl && data.soilMoisture !== null) cardMoistEl.textContent = data.soilMoisture;
+                }
+            } catch (error) {
+                console.error('Error fetching ESP32 data:', error);
+            }
+        }
+        
+        // Fetch immediately and then every 5 seconds
+        fetchESP32Data();
+        setInterval(fetchESP32Data, 5000);
     </script>
 </body>
 

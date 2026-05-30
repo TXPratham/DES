@@ -4,24 +4,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ESP32 Plant Monitor</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:      #0d1117;
-      --surface: #161b22;
-      --card:    #1c2128;
-      --border:  rgba(255,255,255,0.08);
-      --text:    #e6edf3;
-      --muted:   #7d8590;
-      --green:   #3fb950;
-      --yellow:  #d29922;
-      --red:     #f85149;
-      --blue:    #58a6ff;
-      --teal:    #39d353;
+      --bg:      #f5f7f3;
+      --surface: #ffffff;
+      --card:    rgba(255, 255, 255, 0.85);
+      --border:  rgba(87, 99, 65, 0.15);
+      --text:    #2d3320;
+      --muted:   #687550;
+      --green:   #576341;
+      --yellow:  #d4af37;
+      --red:     #c94c4c;
+      --blue:    #4c85c9;
+      --teal:    #3c4727;
+      --accent:  #576341;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Space Grotesk', sans-serif;
+      font-family: 'Manrope', sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
@@ -42,10 +43,11 @@
     }
     .logo-icon {
       width: 40px; height: 40px;
-      background: linear-gradient(135deg, #1a3a2a, #2d6a4f);
+      background: linear-gradient(135deg, #576341, #3c4727);
       border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
       font-size: 20px;
+      box-shadow: 0 4px 10px rgba(87, 99, 65, 0.2);
     }
     h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.3px; }
     .subtitle { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
@@ -65,23 +67,26 @@
     }
     #ip-input:focus { border-color: var(--blue); }
     .btn {
-      background: var(--blue);
-      color: #0d1117;
+      background: var(--green);
+      color: #ffffff;
       border: none;
       border-radius: 8px;
       padding: 8px 16px;
-      font-family: 'Space Grotesk', sans-serif;
+      font-family: 'Manrope', sans-serif;
       font-weight: 600;
       font-size: 13px;
       cursor: pointer;
-      transition: opacity 0.15s;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(87, 99, 65, 0.15);
     }
-    .btn:hover { opacity: 0.85; }
-    .btn.danger { background: var(--red); }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(87, 99, 65, 0.25); }
+    .btn.danger { background: var(--red); color: white; box-shadow: 0 4px 10px rgba(201, 76, 76, 0.15); }
+    .btn.danger:hover { box-shadow: 0 6px 15px rgba(201, 76, 76, 0.25); }
     .btn.ghost {
       background: transparent;
       border: 1px solid var(--border);
       color: var(--text);
+      box-shadow: none;
     }
     .dot {
       width: 8px; height: 8px; border-radius: 50%;
@@ -102,17 +107,25 @@
     }
     .card {
       background: var(--card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 20px 22px;
       position: relative;
       overflow: hidden;
+      box-shadow: 0 4px 24px -8px rgba(87, 99, 65, 0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 32px -12px rgba(87, 99, 65, 0.2);
     }
     .card::before {
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0;
-      height: 3px;
+      height: 4px;
       background: var(--accent, transparent);
       border-radius: 14px 14px 0 0;
     }
@@ -142,14 +155,14 @@
       letter-spacing: 0.5px;
       margin-top: 10px;
     }
-    .badge.ok     { background: rgba(63,185,80,0.12);  color: var(--green);  border: 1px solid rgba(63,185,80,0.25); }
-    .badge.warn   { background: rgba(210,153,34,0.12); color: var(--yellow); border: 1px solid rgba(210,153,34,0.25); }
-    .badge.err    { background: rgba(248,81,73,0.12);  color: var(--red);    border: 1px solid rgba(248,81,73,0.25); }
-    .badge.idle   { background: rgba(125,133,144,0.12);color: var(--muted);  border: 1px solid rgba(125,133,144,0.2); }
+    .badge.ok     { background: rgba(87,99,65,0.12);   color: var(--green);  border: 1px solid rgba(87,99,65,0.25); }
+    .badge.warn   { background: rgba(212,175,55,0.12); color: var(--yellow); border: 1px solid rgba(212,175,55,0.25); }
+    .badge.err    { background: rgba(201,76,76,0.12);  color: var(--red);    border: 1px solid rgba(201,76,76,0.25); }
+    .badge.idle   { background: rgba(104,117,80,0.12); color: var(--muted);  border: 1px solid rgba(104,117,80,0.2); }
 
     .bar-track {
       width: 100%; height: 6px;
-      background: rgba(255,255,255,0.06);
+      background: rgba(87, 99, 65, 0.1);
       border-radius: 10px; margin-top: 14px; overflow: hidden;
     }
     .bar-fill {
@@ -165,10 +178,13 @@
 
     .chart-card {
       background: var(--card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 20px 22px;
       margin-bottom: 20px;
+      box-shadow: 0 4px 24px -8px rgba(87, 99, 65, 0.08);
     }
     .chart-header {
       display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
@@ -178,11 +194,14 @@
 
     .buzzer-card {
       background: var(--card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 20px 22px;
       margin-bottom: 20px;
       display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+      box-shadow: 0 4px 24px -8px rgba(87, 99, 65, 0.08);
     }
     .buzzer-info h3 { font-size: 14px; font-weight: 600; }
     .buzzer-info p  { font-size: 12px; color: var(--muted); margin-top: 4px; }
@@ -190,9 +209,12 @@
 
     .log-card {
       background: var(--card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 20px 22px;
+      box-shadow: 0 4px 24px -8px rgba(87, 99, 65, 0.08);
     }
     .log-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .log-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1.2px; }
@@ -225,41 +247,47 @@
 <body>
 
 <header>
-  <div class="logo">
-    <div class="logo-icon">🌿</div>
-    <div>
+  <div style="display: flex; align-items: center; gap: 16px;">
+    <button class="btn ghost" onclick="window.location.href='smart-farm.html'" style="padding: 6px 12px; display: flex; align-items: center; gap: 8px;">
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M224,128a8,8,0,0,1-8,8H59.31l58.35,58.34a8,8,0,0,1-11.32,11.32l-72-72a8,8,0,0,1,0-11.32l72-72a8,8,0,0,1,11.32,11.32L59.31,120H216A8,8,0,0,1,224,128Z"></path></svg>
+      Back
+    </button>
+    <div class="logo">
+      <div class="logo-icon">🌿</div>
+      <div>
       <h1 data-translate="plant-sensor-monitor">Plant Sensor Monitor</h1>
       <div class="subtitle">ESP32 · DHT22 · Capacitive Soil</div>
+    </div>
     </div>
   </div>
   <div class="connection-row">
     <span class="dot" id="dot"></span>
     <span id="status-text" data-translate="disconnected">Disconnected</span>
-    <input id="ip-input" type="text" placeholder="192.168.x.x" value="192.168.1.100">
+    <input id="ip-input" type="text" placeholder="192.168.x.x" value="10.95.28.62">
     <button class="btn" onclick="connect()" data-translate="connect">Connect</button>
     <button class="btn ghost" onclick="stopPolling()" data-translate="stop">Stop</button>
   </div>
 </header>
 
 <div class="grid">
-  <div class="card" style="--accent: #58a6ff">
+  <div class="card" style="--accent: var(--blue)">
     <div class="card-label" data-translate="air-temp">Air Temperature</div>
     <div class="card-value"><span id="v-temp">--</span><span class="card-unit">°C</span></div>
     <div id="b-temp" class="badge idle" data-translate="waiting">Waiting</div>
   </div>
-  <div class="card" style="--accent: #39d353">
+  <div class="card" style="--accent: var(--teal)">
     <div class="card-label" data-translate="air-humidity">Air Humidity</div>
     <div class="card-value"><span id="v-hum">--</span><span class="card-unit">%</span></div>
     <div id="b-hum" class="badge idle" data-translate="waiting">Waiting</div>
   </div>
-  <div class="card" style="--accent: #3fb950">
+  <div class="card" style="--accent: var(--green)">
     <div class="card-label" data-translate="soil-moisture">Soil Moisture</div>
     <div class="card-value"><span id="v-soil">--</span><span class="card-unit">%</span></div>
     <div id="b-soil" class="badge idle" data-translate="waiting">Waiting</div>
     <div class="bar-track"><div class="bar-fill" id="soil-bar" style="width:0%"></div></div>
     <div class="range-labels"><span data-translate="dry">Dry</span><span data-translate="ideal-range">Ideal 40–70%</span><span data-translate="wet">Wet</span></div>
   </div>
-  <div class="card" style="--accent: #d29922">
+  <div class="card" style="--accent: var(--yellow)">
     <div class="card-label">DHT22 Sensor</div>
     <div class="card-value" style="font-size:1.5rem; margin-top:10px" id="v-dht">--</div>
     <div id="b-dht" class="badge idle" data-translate="waiting">Waiting</div>
@@ -314,20 +342,20 @@
     data: {
       labels: chartData.labels,
       datasets: [
-        { label: 'Temp (°C)',     data: chartData.temp,     borderColor: '#58a6ff', backgroundColor: 'rgba(88,166,255,0.07)', tension: 0.4, pointRadius: 2, borderWidth: 1.5 },
-        { label: 'Humidity (%)', data: chartData.humidity, borderColor: '#39d353', backgroundColor: 'rgba(57,211,83,0.07)',  tension: 0.4, pointRadius: 2, borderWidth: 1.5 },
-        { label: 'Soil (%)',     data: chartData.soil,     borderColor: '#d29922', backgroundColor: 'rgba(210,153,34,0.07)', tension: 0.4, pointRadius: 2, borderWidth: 1.5 }
+        { label: 'Temp (°C)',     data: chartData.temp,     borderColor: '#4c85c9', backgroundColor: 'rgba(76,133,201,0.07)', tension: 0.4, pointRadius: 2, borderWidth: 1.5 },
+        { label: 'Humidity (%)', data: chartData.humidity, borderColor: '#3c4727', backgroundColor: 'rgba(60,71,39,0.07)',  tension: 0.4, pointRadius: 2, borderWidth: 1.5 },
+        { label: 'Soil (%)',     data: chartData.soil,     borderColor: '#d4af37', backgroundColor: 'rgba(212,175,55,0.07)', tension: 0.4, pointRadius: 2, borderWidth: 1.5 }
       ]
     },
     options: {
       responsive: true,
       animation: false,
       plugins: {
-        legend: { labels: { color: '#7d8590', font: { family: 'Space Grotesk', size: 12 }, boxWidth: 12 } }
+        legend: { labels: { color: '#687550', font: { family: 'Manrope', size: 12 }, boxWidth: 12 } }
       },
       scales: {
-        x: { ticks: { color: '#7d8590', font: { size: 11 }, maxRotation: 0 }, grid: { color: 'rgba(255,255,255,0.04)' } },
-        y: { ticks: { color: '#7d8590', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' }, min: 0 }
+        x: { ticks: { color: '#687550', font: { size: 11 }, maxRotation: 0 }, grid: { color: 'rgba(87,99,65,0.08)' } },
+        y: { ticks: { color: '#687550', font: { size: 11 } }, grid: { color: 'rgba(87,99,65,0.08)' }, min: 0 }
       }
     }
   });
@@ -378,7 +406,7 @@
             badge(d.soilMoisture, 40, 70, true), 'b-soil');
     const bar = document.getElementById('soil-bar');
     bar.style.width = d.soilMoisture + '%';
-    bar.style.background = d.soilMoisture < 40 ? '#d29922' : d.soilMoisture > 70 ? '#f85149' : '#3fb950';
+    bar.style.background = d.soilMoisture < 40 ? 'var(--yellow)' : d.soilMoisture > 70 ? 'var(--red)' : 'var(--green)';
 
     // DHT
     document.getElementById('v-dht').textContent = d.dhtOK ? 'Connected' : 'Error';

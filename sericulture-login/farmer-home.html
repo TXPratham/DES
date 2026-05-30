@@ -139,10 +139,7 @@
                     <i class="ph ph-bank text-xl"></i>
                     <span class="hidden lg:block">Scheme Engine</span>
                 </a>
-                <a href="arduino-dashboard.html" class="nav-item flex items-center gap-4 px-4 py-3 rounded-xl font-semibold text-gray-500 border-l-[3px] border-transparent">
-                    <i class="ph ph-cpu text-xl"></i>
-                    <span class="hidden lg:block">Arduino Server</span>
-                </a>
+
                 <a href="esp32-plant-monitor.html" class="nav-item flex items-center gap-4 px-4 py-3 rounded-xl font-semibold text-gray-500 border-l-[3px] border-transparent">
                     <i class="ph ph-leaf text-xl"></i>
                     <span class="hidden lg:block">ESP32 Monitor</span>
@@ -177,10 +174,10 @@
             <div class="flex items-center gap-4">
                 <div class="hidden sm:flex items-center gap-3 bg-white px-4 py-2 rounded-full border border-gray-200 shadow-sm">
                     <i class="ph ph-thermometer text-mulberry text-lg"></i>
-                    <span class="text-sm font-bold text-gray-700">28°C</span>
+                    <span id="header-temp" class="text-sm font-bold text-gray-700">28°C</span>
                     <div class="w-px h-4 bg-gray-300"></div>
                     <i class="ph ph-drop text-blue-400 text-lg"></i>
-                    <span class="text-sm font-bold text-gray-700">65%</span>
+                    <span id="header-humidity" class="text-sm font-bold text-gray-700">65%</span>
                 </div>
                 <button class="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-200 shadow-sm text-gray-500 hover:text-mulberry transition-colors relative">
                     <i class="ph ph-bell text-xl"></i>
@@ -506,6 +503,28 @@
                 }
             }
         });
+    </script>
+    <script>
+        async function fetchESP32Data() {
+            try {
+                const response = await fetch('http://10.95.28.62/api/data');
+                const data = await response.json();
+                
+                if (data.dhtOK) {
+                    const tempEl = document.getElementById('header-temp');
+                    const humEl = document.getElementById('header-humidity');
+                    
+                    if (tempEl && data.airTemp !== null) tempEl.textContent = data.airTemp.toFixed(1) + '°C';
+                    if (humEl && data.airHumidity !== null) humEl.textContent = data.airHumidity.toFixed(1) + '%';
+                }
+            } catch (error) {
+                console.error('Error fetching ESP32 data:', error);
+            }
+        }
+        
+        // Fetch immediately and then every 5 seconds
+        fetchESP32Data();
+        setInterval(fetchESP32Data, 5000);
     </script>
 </body>
 </html>
