@@ -5,231 +5,1451 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SeriFusion - IoT Smart Farm</title>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="index-tailwind.js"></script>
-    <link rel="stylesheet" href="index.css">
-    <!-- Chart.js for data visualization -->
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="global-translate.js"></script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #a8b58d; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #576341; }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 24px -8px rgba(87, 99, 65, 0.08);
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #576341 0%, #3c4727 100%);
+        }
+
+        .text-gradient {
+            background: linear-gradient(to right, #576341, #d4af37);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hover-lift {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 32px -12px rgba(87, 99, 65, 0.2);
+            border-color: rgba(212, 175, 55, 0.3);
+        }
+
+        .nav-item {
+            transition: all 0.3s ease;
+        }
+        .nav-item:hover, .nav-item.active {
+            background: linear-gradient(90deg, rgba(87,99,65,0.08) 0%, rgba(87,99,65,0) 100%);
+            color: #576341;
+            border-left: 3px solid #576341;
+        }
+        .nav-item i {
+            transition: transform 0.3s ease;
+        }
+        .nav-item:hover i {
+            transform: scale(1.1);
+            color: #576341;
+        }
+        
+        .animate-fade-in { animation: fadeIn 0.8s ease-out forwards; }
+        .animate-slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Spinning animation for exhaust fan */
+        @keyframes fanSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .fan-spin {
+            animation: fanSpin 1.5s linear infinite;
+        }
+
+        /* Pulsing mist animation for humidifiers */
+        @keyframes mistPulse {
+            0%, 100% { opacity: 0.4; transform: scale(0.9); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+        .mist-pulse {
+            animation: mistPulse 2s ease-in-out infinite;
+        }
+
+        /* Drip animation for water drops */
+        @keyframes dripDrop {
+            0% { transform: translateY(-5px); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(8px); opacity: 0; }
+        }
+        .drip-anim {
+            animation: dripDrop 1.2s infinite ease-in;
+        }
+
+        /* Shaking animation for soil dosing */
+        @keyframes doseShake {
+            0%, 100% { transform: rotate(0); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+        .dose-shake {
+            animation: doseShake 0.6s infinite ease-in-out;
+        }
+    </style>
 </head>
 
-<body class="bg-cream font-sans antialiased text-earthy min-h-screen">
+<body class="bg-[#f5f7f3] text-earthy antialiased flex h-screen overflow-hidden font-sans">
 
-    <!-- Navigation -->
-    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center space-x-3">
-                    <img src="logo.png" alt="SeriFusion Logo" class="w-10 h-10 object-contain rounded-full">
-                    <span class="font-bold text-xl tracking-tight text-mulberry-dark">SeriFusion IoT Control</span>
+    <!-- Sidebar -->
+    <aside class="w-20 lg:w-72 bg-white flex flex-col h-full relative z-30 shadow-soft border-r border-gray-100 transition-all duration-300 flex-shrink-0">
+        <div class="p-6 flex items-center justify-center lg:justify-start gap-4 border-b border-gray-100 h-20">
+            <div class="relative w-10 h-10 flex items-center justify-center bg-mulberry/10 rounded-xl border border-mulberry/20">
+                <img src="logo.png" alt="Logo" class="w-7 h-7 object-contain">
+            </div>
+            <span class="font-extrabold text-xl text-mulberry-dark hidden lg:block tracking-tight">SeriFusion</span>
+        </div>
+        
+        <div class="py-6 overflow-y-auto flex-1 custom-scrollbar">
+            <p class="px-8 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4 hidden lg:block">Main Menu</p>
+            <nav class="flex flex-col gap-2 px-4">
+                <a href="farmer-home.html" class="nav-item flex items-center gap-4 px-4 py-3 rounded-xl font-semibold text-gray-500 border-l-[3px] border-transparent">
+                    <i class="ph ph-squares-four text-xl"></i>
+                    <span class="hidden lg:block">Dashboard</span>
+                </a>
+                <a href="farm-update.html" class="nav-item flex items-center gap-4 px-4 py-3 rounded-xl font-semibold text-gray-500 border-l-[3px] border-transparent">
+                    <i class="ph ph-note-pencil text-xl"></i>
+                    <span class="hidden lg:block">Daily Log</span>
+                </a>
+                <a href="smart-farm.html" class="nav-item active flex items-center gap-4 px-4 py-3 rounded-xl font-bold text-gray-500 border-l-[3px] border-transparent">
+                    <i class="ph ph-plant text-xl"></i>
+                    <span class="hidden lg:block">Smart Farm</span>
+                </a>
+                <a href="crop-calendar.html" class="nav-item flex items-center gap-4 px-4 py-3 rounded-xl font-semibold text-gray-500 border-l-[3px] border-transparent">
+                    <i class="ph ph-calendar-check text-xl"></i>
+                    <span class="hidden lg:block">Crop Calendar</span>
+                </a>
+                <a href="weather-advisor.html" class="nav-item flex items-center gap-4 px-4 py-3 rounded-xl font-semibold text-gray-500 border-l-[3px] border-transparent">
+                    <i class="ph ph-cloud-sun text-xl"></i>
+                    <span class="hidden lg:block">Weather Advisor</span>
+                </a>
+                <a href="silk-exchange.html" class="nav-item flex items-center gap-4 px-4 py-3 rounded-xl font-semibold text-gray-500 border-l-[3px] border-transparent">
+                    <i class="ph ph-currency-inr text-xl"></i>
+                    <span class="hidden lg:block">Silk Exchange</span>
+                </a>
+            </nav>
+            <p class="px-8 text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-6 mb-4 hidden lg:block">Other Features</p>
+            <nav class="flex flex-col gap-2 px-4 pb-4">
+                <a href="cocoon-grading.html" class="nav-item flex items-center gap-4 px-4 py-3 rounded-xl font-semibold text-gray-500 border-l-[3px] border-transparent">
+                    <i class="ph ph-medal text-xl"></i>
+                    <span class="hidden lg:block">Cocoon Grading</span>
+                </a>
+                <a href="daily-news.html" class="nav-item flex items-center gap-4 px-4 py-3 rounded-xl font-semibold text-gray-500 border-l-[3px] border-transparent">
+                    <i class="ph ph-newspaper text-xl"></i>
+                    <span class="hidden lg:block">Daily News</span>
+                </a>
+                <a href="insights.html" class="nav-item flex items-center gap-4 px-4 py-3 rounded-xl font-semibold text-gray-500 border-l-[3px] border-transparent">
+                    <i class="ph ph-chart-bar text-xl"></i>
+                    <span class="hidden lg:block">Insights</span>
+                </a>
+                <a href="scheme-engine.html" class="nav-item flex items-center gap-4 px-4 py-3 rounded-xl font-semibold text-gray-500 border-l-[3px] border-transparent">
+                    <i class="ph ph-bank text-xl"></i>
+                    <span class="hidden lg:block">Scheme Engine</span>
+                </a>
+                <a href="arduino-dashboard.html" class="nav-item flex items-center gap-4 px-4 py-3 rounded-xl font-semibold text-gray-500 border-l-[3px] border-transparent">
+                    <i class="ph ph-cpu text-xl"></i>
+                    <span class="hidden lg:block">Arduino Server</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="p-6 border-t border-gray-100 bg-gray-50/50">
+            <div class="flex items-center justify-center lg:justify-start gap-4 cursor-pointer hover:opacity-80 transition-opacity">
+                <div class="w-10 h-10 rounded-full hero-gradient text-white flex items-center justify-center font-bold shadow-md shadow-mulberry/30">
+                    <i class="ph ph-user text-lg"></i>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <span
-                        class="px-3 py-1 bg-green-100 text-green-700 font-bold rounded-full text-xs flex items-center gap-1">
-                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Sensors Active
-                    </span>
-                    <a href="farmer-home.html"
-                        class="text-sm font-medium text-earthy hover:text-mulberry transition-colors">Back to
-                        Dashboard</a>
+                <div class="hidden lg:block">
+                    <p class="text-sm font-bold text-mulberry-dark" id="sidebar-farmer-name">Ramesh Patil</p>
+                    <a href="index.html" class="text-xs text-red-500 hover:text-red-600 font-semibold flex items-center gap-1 mt-0.5">
+                        <i class="ph ph-sign-out"></i> Logout
+                    </a>
                 </div>
             </div>
         </div>
-    </nav>
+    </aside>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 py-8">
+    <!-- Main Content Panel -->
+    <main class="flex-1 h-full overflow-y-auto relative z-10 animate-fade-in custom-scrollbar">
+        
+        <!-- Header Area -->
+        <header class="sticky top-0 z-20 bg-[#f5f7f3]/90 backdrop-blur-md border-b border-gray-200/50 px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <i class="ph ph-cpu text-silkgold text-lg animate-pulse"></i>
+                <span class="text-sm font-bold text-gray-600">Smart Farm Climate Optimizer</span>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="hidden sm:flex items-center gap-3 bg-white px-4 py-2 rounded-full border border-gray-200 shadow-sm">
+                    <i class="ph ph-thermometer text-mulberry text-lg"></i>
+                    <span class="text-sm font-bold text-gray-700" id="headerTemp">26.5°C</span>
+                    <div class="w-px h-4 bg-gray-300"></div>
+                    <i class="ph ph-drop text-blue-400 text-lg"></i>
+                    <span class="text-sm font-bold text-gray-700" id="headerHum">72%</span>
+                </div>
+                
+                <!-- Enabled Active Notifications Dropdown -->
+                <div class="relative">
+                    <button id="notificationBellBtn" class="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-200 shadow-sm text-gray-500 hover:text-mulberry transition-colors relative focus:outline-none">
+                        <i class="ph ph-bell text-xl"></i>
+                        <span id="notificationBadge" class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+                    </button>
+                    <!-- Notification Panel Dropdown -->
+                    <div id="notificationDropdown" class="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 hidden z-50 transform origin-top-right transition-all duration-300">
+                        <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
+                            <span class="font-bold text-sm text-mulberry-dark">Ecosystem Alerts</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-red-100 text-red-700 font-bold uppercase tracking-wider" id="activeAlertCount">0 Active</span>
+                        </div>
+                        <div class="p-2 max-h-64 overflow-y-auto space-y-1.5 custom-scrollbar" id="notificationList">
+                            <!-- Dynamic alert messages will load here -->
+                        </div>
+                        <div class="p-3 border-t border-gray-100 text-center bg-gray-50 rounded-b-2xl">
+                            <button onclick="document.getElementById('notificationDropdown').classList.add('hidden')" class="text-xs font-bold text-mulberry hover:text-mulberry-dark">Close Panel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
 
-        <div class="mb-8">
-            <h1 class="text-3xl font-extrabold text-mulberry-dark">Automated Rearing House (Shed A)</h1>
-            <p class="text-earthy/80 mt-2">Real-time IoT sensor data and automated climate control. Instar Stage: 4th
-                Instar.</p>
-        </div>
+        <!-- Content Area Wrapper -->
+        <div class="p-8 max-w-7xl mx-auto space-y-8">
+            
+            <!-- Dashboard Title -->
+            <div class="animate-slide-up flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 class="text-3xl font-extrabold text-mulberry-dark tracking-tight">Climate Rearing House & Plantation</h1>
+                    <p class="text-earthy/70 font-medium mt-1">Configure your target environment based on biological stages of silkworm development.</p>
+                </div>
+            </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
 
-            <!-- Temperature Widget -->
-            <div class="glass-card bg-white p-6 rounded-2xl shadow-sm border-l-4 border-orange-400">
-                <div class="flex justify-between items-start">
+            <!-- Critical Climate Alert Banner -->
+            <div id="criticalAlertBanner" class="hidden p-4 bg-red-50 border border-red-200 rounded-3xl flex items-center justify-between text-red-800 shadow-sm transition-all duration-300">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0 animate-pulse">
+                        <i class="ph ph-warning-octagon text-xl font-bold"></i>
+                    </div>
                     <div>
-                        <p class="text-sm font-bold text-gray-500 uppercase">Temperature</p>
-                        <h2 class="text-4xl font-extrabold text-mulberry-dark mt-1"><span id="arduinoTemp">26.5</span><span
-                                class="text-2xl text-gray-400">°C</span></h2>
-                    </div>
-                    <div class="p-3 bg-orange-50 rounded-lg text-orange-500">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-                            </path>
-                        </svg>
+                        <h4 class="text-xs font-bold uppercase tracking-wide">🚨 CRITICAL ECOSYSTEM ALERTS</h4>
+                        <div class="text-xs text-red-600 font-semibold mt-0.5 space-y-0.5" id="criticalAlertList">
+                            <!-- dynamic alerts will insert here -->
+                        </div>
                     </div>
                 </div>
-                <div class="mt-4 flex items-center justify-between text-sm">
-                    <span class="text-orange-600 font-medium">Slightly High</span>
-                    <span class="text-gray-400">Target: 24°C - 25°C</span>
-                </div>
-                <div class="mt-4 pt-4 border-t border-gray-100">
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm font-semibold text-gray-600">Auto Exhaust Fans</span>
+                <span class="px-3 py-1.5 bg-red-600 text-white font-extrabold rounded-xl text-[10px] uppercase tracking-wider animate-pulse">Action Required</span>
+            </div>
+
+            <!-- biological growth stages horizontal selectors -->
+            <div class="animate-slide-up delay-100 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm overflow-x-auto whitespace-nowrap custom-scrollbar flex gap-2">
+                <button onclick="switchStage('incubation')" id="btn-incubation" class="stage-btn px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 border border-transparent">
+                    <i class="ph ph-egg text-lg"></i>
+                    <span>Incubation</span>
+                </button>
+                <button onclick="switchStage('instar_1_2')" id="btn-instar_1_2" class="stage-btn px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 border border-transparent">
+                    <i class="ph ph-bug text-lg"></i>
+                    <span>I - II Instar (Chowki)</span>
+                </button>
+                <button onclick="switchStage('instar_3')" id="btn-instar_3" class="stage-btn px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 border border-transparent">
+                    <i class="ph ph-bug text-lg"></i>
+                    <span>III Instar</span>
+                </button>
+                <button onclick="switchStage('instar_4')" id="btn-instar_4" class="stage-btn px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 border border-transparent">
+                    <i class="ph ph-bug text-lg animate-pulse"></i>
+                    <span>IV Instar</span>
+                </button>
+                <button onclick="switchStage('instar_5')" id="btn-instar_5" class="stage-btn px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 border border-transparent">
+                    <i class="ph ph-bug text-lg"></i>
+                    <span>V Instar</span>
+                </button>
+                <button onclick="switchStage('moulting')" id="btn-moulting" class="stage-btn px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 border border-transparent">
+                    <i class="ph ph-shield-warning text-lg"></i>
+                    <span>Moulting</span>
+                </button>
+                <button onclick="switchStage('spinning')" id="btn-spinning" class="stage-btn px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 border border-transparent">
+                    <i class="ph ph-infinity text-lg"></i>
+                    <span>Spinning / Cocoon</span>
+                </button>
+            </div>
+
+
+
+            <!-- IoT Smart Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-slide-up delay-200">
+                
+                <!-- Air Temperature Card -->
+                <div class="glass-card bg-white p-6 rounded-2xl shadow-sm border-l-4" id="tempCardBorder" style="border-left-color: #fb923c;">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Chamber Temp</p>
+                            <h2 class="text-4xl font-extrabold text-mulberry-dark mt-1 flex items-baseline gap-1">
+                                <span id="cardTemp">26.5</span>
+                                <span class="text-xl text-gray-400 font-bold">°C</span>
+                            </h2>
+                        </div>
+                        <div class="p-2.5 rounded-xl text-orange-500 bg-orange-50" id="tempIconBox">
+                            <i class="ph ph-thermometer text-2xl" id="tempIcon"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 flex items-center justify-between text-xs font-bold">
+                        <span id="tempStatusBadge" class="px-2 py-0.5 rounded bg-orange-100 text-orange-700">Slightly High</span>
+                        <span class="text-gray-400 font-semibold" id="tempTargetLabel">Target: 25 - 26°C</span>
+                    </div>
+
+                    <div class="mt-5 pt-4 border-t border-gray-100 flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <i class="ph ph-wind text-lg text-gray-400" id="fanActuatorIcon"></i>
+                            <span class="text-xs font-bold text-gray-600">Auto Exhaust Fans</span>
+                        </div>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" checked class="sr-only peer">
-                            <div
-                                class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-400">
-                            </div>
+                            <input type="checkbox" id="exhaustFanToggle" checked class="sr-only peer">
+                            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-orange-400"></div>
                         </label>
                     </div>
                 </div>
-            </div>
 
-            <!-- Humidity Widget -->
-            <div class="glass-card bg-white p-6 rounded-2xl shadow-sm border-l-4 border-blue-400">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sm font-bold text-gray-500 uppercase">Humidity</p>
-                        <h2 class="text-4xl font-extrabold text-mulberry-dark mt-1"><span id="arduinoHum">72</span><span
-                                class="text-2xl text-gray-400">%</span></h2>
+                <!-- Air Humidity Card -->
+                <div class="glass-card bg-white p-6 rounded-2xl shadow-sm border-l-4" id="humCardBorder" style="border-left-color: #3b82f6;">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Chamber Humidity</p>
+                            <h2 class="text-4xl font-extrabold text-mulberry-dark mt-1 flex items-baseline gap-1">
+                                <span id="cardHum">72.0</span>
+                                <span class="text-xl text-gray-400 font-bold">%</span>
+                            </h2>
+                        </div>
+                        <div class="p-2.5 rounded-xl text-blue-500 bg-blue-50" id="humIconBox">
+                            <i class="ph ph-drop text-2xl" id="humIcon"></i>
+                        </div>
                     </div>
-                    <div class="p-3 bg-blue-50 rounded-lg text-blue-500">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z">
-                            </path>
-                        </svg>
+                    
+                    <div class="mt-4 flex items-center justify-between text-xs font-bold">
+                        <span id="humStatusBadge" class="px-2 py-0.5 rounded bg-green-100 text-green-700">Optimal Range</span>
+                        <span class="text-gray-400 font-semibold" id="humTargetLabel">Target: 70 - 75%</span>
                     </div>
-                </div>
-                <div class="mt-4 flex items-center justify-between text-sm">
-                    <span class="text-green-600 font-medium">Optimal Range</span>
-                    <span class="text-gray-400">Target: 70% - 75%</span>
-                </div>
-                <div class="mt-4 pt-4 border-t border-gray-100">
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm font-semibold text-gray-600">Auto Humidifiers</span>
+
+                    <div class="mt-5 pt-4 border-t border-gray-100 flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <i class="ph ph-cloud-fog text-lg text-gray-400" id="humidifierActuatorIcon"></i>
+                            <span class="text-xs font-bold text-gray-600">Auto Humidifiers</span>
+                        </div>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" class="sr-only peer">
-                            <div
-                                class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-400">
-                            </div>
+                            <input type="checkbox" id="humidifierToggle" class="sr-only peer">
+                            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-400"></div>
                         </label>
                     </div>
                 </div>
+
+                <!-- Mulberry Soil pH Card -->
+                <div class="glass-card bg-white p-6 rounded-2xl shadow-sm border-l-4 border-emerald-500" id="phCardBorder">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider" data-translate="Soil pH">Soil pH</p>
+                            <h2 class="text-4xl font-extrabold text-mulberry-dark mt-1 flex items-baseline gap-1">
+                                <span id="cardPh">6.5</span>
+                                <span class="text-xl text-gray-400 font-bold">pH</span>
+                            </h2>
+                        </div>
+                        <div class="p-2.5 rounded-xl text-emerald-500 bg-emerald-50" id="phIconBox">
+                            <i class="ph ph-flask text-2xl" id="phIcon"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-2 flex items-center justify-between text-xs font-bold">
+                        <span id="phStatusBadge" class="px-2 py-0.5 rounded bg-green-100 text-green-700">✓ Normal Range</span>
+                        <span class="text-gray-400 font-semibold">Target: 6.2 - 6.8</span>
+                    </div>
+                    
+                    <div class="mt-2">
+                        <!-- Tiny visual pointer slider gauge for pH -->
+                        <div class="w-full h-1.5 bg-gray-200 rounded-full relative mt-2">
+                            <!-- Background color bands for pH scales: Acid (red), Neutral (green), Alkaline (blue) -->
+                            <div class="absolute top-0 left-0 w-1/3 h-full bg-red-400/40 rounded-l-full"></div>
+                            <div class="absolute top-0 left-1/3 w-1/3 h-full bg-emerald-400/50"></div>
+                            <div class="absolute top-0 left-2/3 w-1/3 h-full bg-blue-400/40 rounded-r-full"></div>
+                            <!-- Safe Target limits marker -->
+                            <div class="absolute top-0 left-[36.6%] w-[10%] h-full border-x-2 border-emerald-600/80 bg-emerald-300/30"></div>
+                            <!-- Pointer dot -->
+                            <div id="phPointer" class="absolute -top-1 w-3.5 h-3.5 bg-emerald-600 border border-white rounded-full transition-all duration-300" style="left: 50%;"></div>
+                        </div>
+                        <div class="flex justify-between text-[9px] text-gray-400 font-bold mt-1 uppercase tracking-wider">
+                            <span>Acidic</span>
+                            <span class="text-emerald-600">6.2 - 6.8 Optimal</span>
+                            <span>Alkaline</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <i class="ph ph-drop-half-bottom text-lg text-gray-400" id="doserActuatorIcon"></i>
+                            <span class="text-xs font-bold text-gray-600">Soil Conditioner Doser</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="phDoserToggle" class="sr-only peer">
+                            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Mulberry Soil Moisture Card -->
+                <div class="glass-card bg-white p-6 rounded-2xl shadow-sm border-l-4 border-teal-500" id="moistCardBorder">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider" data-translate="Soil Moisture">Mulberry Moisture</p>
+                            <h2 class="text-4xl font-extrabold text-mulberry-dark mt-1 flex items-baseline gap-1">
+                                <span id="cardMoist">65</span>
+                                <span class="text-xl text-gray-400 font-bold">%</span>
+                            </h2>
+                        </div>
+                        <div class="p-2.5 rounded-xl text-teal-500 bg-teal-50" id="moistIconBox">
+                            <i class="ph ph-plant text-2xl" id="moistIcon"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 flex items-center justify-between text-xs font-bold">
+                        <span id="moistStatusBadge" class="px-2 py-0.5 rounded bg-green-100 text-green-700">Adequate</span>
+                        <span class="text-gray-400 font-semibold">Target: 60 - 80%</span>
+                    </div>
+
+                    <div class="mt-5 pt-4 border-t border-gray-100 flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <i class="ph ph-sprinkler text-lg text-gray-400" id="irrigationActuatorIcon"></i>
+                            <span class="text-xs font-bold text-gray-600">Drip Irrigation Valve</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="irrigationToggle" class="sr-only peer">
+                            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-500"></div>
+                        </label>
+                    </div>
+                </div>
+
             </div>
 
-            <!-- Soil Temperature Widget -->
-            <div class="glass-card bg-white p-6 rounded-2xl shadow-sm border-l-4 border-amber-500">
-                <div class="flex justify-between items-start">
+            <!-- Simulator Control Drawer (Visible only when simulation is toggled on) -->
+            <div id="simulationDrawer" class="animate-slide-up delay-250 bg-white border border-dashed border-mulberry/30 rounded-3xl p-6 shadow-sm relative overflow-hidden">
+                <!-- Decorative background elements -->
+                <div class="absolute top-0 right-0 w-32 h-32 bg-mulberry/5 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="absolute bottom-0 left-0 w-32 h-32 bg-silkgold/5 rounded-full blur-2xl pointer-events-none"></div>
+
+                <div class="flex items-center gap-2 mb-4 border-b border-gray-100 pb-3">
+                    <i class="ph ph-sliders text-xl text-mulberry animate-bounce"></i>
+                    <h3 class="font-bold text-lg text-mulberry-dark">Interactive IoT Sandbox Simulator Controls</h3>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Temp Slider -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs font-bold text-gray-700">
+                            <span>Simulate Temp</span>
+                            <span class="text-orange-500 font-extrabold" id="simTempVal">26.5 °C</span>
+                        </div>
+                        <input type="range" id="simTemp" min="15" max="35" step="0.1" value="26.5" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-500">
+                        <div class="flex justify-between text-[10px] text-gray-400 font-semibold">
+                            <span>15°C (Cold)</span>
+                            <span>35°C (Hot)</span>
+                        </div>
+                    </div>
+
+                    <!-- Hum Slider -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs font-bold text-gray-700">
+                            <span>Simulate Hum</span>
+                            <span class="text-blue-500 font-extrabold" id="simHumVal">72 %</span>
+                        </div>
+                        <input type="range" id="simHum" min="40" max="100" step="0.5" value="72" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                        <div class="flex justify-between text-[10px] text-gray-400 font-semibold">
+                            <span>40% (Dry)</span>
+                            <span>100% (Wet)</span>
+                        </div>
+                    </div>
+
+                    <!-- pH Slider -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs font-bold text-gray-700">
+                            <span>Simulate Soil pH</span>
+                            <span class="text-emerald-600 font-extrabold" id="simPhVal">6.5 pH</span>
+                        </div>
+                        <input type="range" id="simPh" min="4.0" max="9.0" step="0.1" value="6.5" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+                        <div class="flex justify-between text-[10px] text-gray-400 font-semibold">
+                            <span>4.0 pH (Acidic)</span>
+                            <span>9.0 pH (Alkaline)</span>
+                        </div>
+                    </div>
+
+                    <!-- Moisture Slider -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs font-bold text-gray-700">
+                            <span>Simulate Soil Moist</span>
+                            <span class="text-teal-600 font-extrabold" id="simMoistVal">65 %</span>
+                        </div>
+                        <input type="range" id="simMoist" min="20" max="100" step="1" value="65" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-teal-500">
+                        <div class="flex justify-between text-[10px] text-gray-400 font-semibold">
+                            <span>20% (Dry Soil)</span>
+                            <span>100% (Saturated)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Climate Chart & Quick Scientific Reference Table -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-slide-up delay-300">
+                
+                <!-- Chart Panel (2/3 width) -->
+                <div class="lg:col-span-2 glass-card bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-mulberry-dark">Climate Trend Monitor</h3>
+                            <p class="text-xs font-semibold text-gray-500">Real-time minute tracking with running averages.</p>
+                        </div>
+                        
+                        <!-- 24-Hour Averages Display Panel -->
+                        <div class="flex items-center gap-4 bg-[#f8faf6] px-4 py-2 rounded-2xl border border-gray-200 shadow-inner">
+                            <div class="text-center">
+                                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wide">24h Avg Temp</p>
+                                <p class="text-xs font-extrabold text-mulberry-dark" id="avg24Temp">25.5°C</p>
+                            </div>
+                            <div class="w-px h-5 bg-gray-200"></div>
+                            <div class="text-center">
+                                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wide">24h Avg Hum</p>
+                                <p class="text-xs font-extrabold text-mulberry-dark" id="avg24Hum">71.2%</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-orange-400"></span>
+                            <span class="text-[10px] text-gray-500 font-bold">Temp</span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-blue-400 ml-2"></span>
+                            <span class="text-[10px] text-gray-500 font-bold">Humidity</span>
+                        </div>
+                    </div>
+                    <div class="w-full h-80 relative flex-1">
+                        <canvas id="climateChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Complete Scientific Guidelines Reference Sheet -->
+                <div class="glass-card bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between">
                     <div>
-                        <p class="text-sm font-bold text-gray-500 uppercase" data-translate="Soil Temp">Soil Temp</p>
-                        <h2 class="text-4xl font-extrabold text-mulberry-dark mt-1">22.4<span class="text-2xl text-gray-400">°C</span></h2>
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-lg font-bold text-mulberry-dark">Standard Protocol Desk</h3>
+                            <i class="ph ph-file-text text-xl text-silkgold"></i>
+                        </div>
+                        <p class="text-xs text-gray-500 font-semibold mb-4">Reference thresholds based on central sericultural guidelines.</p>
+
+                        <div class="space-y-2.5 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+                            
+                            <!-- Incubation row -->
+                            <div id="row-incubation" class="p-2 border border-gray-100 rounded-xl flex justify-between items-center text-xs font-bold transition-all duration-300">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0" id="dot-incubation"></span>
+                                    <span class="text-gray-700">Incubation</span>
+                                </div>
+                                <div class="text-right text-[10px]">
+                                    <p class="text-orange-500">25 - 26°C</p>
+                                    <p class="text-blue-500">75 - 80% RH</p>
+                                </div>
+                            </div>
+
+                            <!-- Chowki 1 & 2 -->
+                            <div id="row-instar_1_2" class="p-2 border border-gray-100 rounded-xl flex justify-between items-center text-xs font-bold transition-all duration-300">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0" id="dot-instar_1_2"></span>
+                                    <span class="text-gray-700">I & II Instar (Chowki)</span>
+                                </div>
+                                <div class="text-right text-[10px]">
+                                    <p class="text-orange-500">27 - 28°C</p>
+                                    <p class="text-blue-500">80 - 90% RH</p>
+                                </div>
+                            </div>
+
+                            <!-- III Instar -->
+                            <div id="row-instar_3" class="p-2 border border-gray-100 rounded-xl flex justify-between items-center text-xs font-bold transition-all duration-300">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0" id="dot-instar_3"></span>
+                                    <span class="text-gray-700">III Instar</span>
+                                </div>
+                                <div class="text-right text-[10px]">
+                                    <p class="text-orange-500">26 - 27°C</p>
+                                    <p class="text-blue-500">75 - 80% RH</p>
+                                </div>
+                            </div>
+
+                            <!-- IV Instar -->
+                            <div id="row-instar_4" class="p-2 border border-gray-100 rounded-xl flex justify-between items-center text-xs font-bold transition-all duration-300">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0" id="dot-instar_4"></span>
+                                    <span class="text-gray-700">IV Instar (Late Larva)</span>
+                                </div>
+                                <div class="text-right text-[10px]">
+                                    <p class="text-orange-500">25 - 26°C</p>
+                                    <p class="text-blue-500">70 - 75% RH</p>
+                                </div>
+                            </div>
+
+                            <!-- V Instar -->
+                            <div id="row-instar_5" class="p-2 border border-gray-100 rounded-xl flex justify-between items-center text-xs font-bold transition-all duration-300">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0" id="dot-instar_5"></span>
+                                    <span class="text-gray-700">V Instar (Late Larva)</span>
+                                </div>
+                                <div class="text-right text-[10px]">
+                                    <p class="text-orange-500">24 - 25°C</p>
+                                    <p class="text-blue-500">65 - 70% RH</p>
+                                </div>
+                            </div>
+
+                            <!-- Moulting -->
+                            <div id="row-moulting" class="p-2 border border-gray-100 rounded-xl flex justify-between items-center text-xs font-bold transition-all duration-300">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0" id="dot-moulting"></span>
+                                    <span class="text-gray-700">Moulting Stage</span>
+                                </div>
+                                <div class="text-right text-[10px]">
+                                    <p class="text-orange-500">25 - 26°C</p>
+                                    <p class="text-blue-500">60 - 65% RH</p>
+                                </div>
+                            </div>
+
+                            <!-- Spinning -->
+                            <div id="row-spinning" class="p-2 border border-gray-100 rounded-xl flex justify-between items-center text-xs font-bold transition-all duration-300">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0" id="dot-spinning"></span>
+                                    <span class="text-gray-700">Spinning & Cocoon</span>
+                                </div>
+                                <div class="text-right text-[10px]">
+                                    <p class="text-orange-500">24 - 25°C</p>
+                                    <p class="text-blue-500">65 - 70% RH</p>
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
-                    <div class="p-3 bg-amber-50 rounded-lg text-amber-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+
+                    <!-- Mulberry Extra quick reference card footer -->
+                    <div class="mt-4 pt-3 border-t border-gray-100 text-[10px] font-bold text-gray-500 space-y-1 bg-emerald-50/40 p-2.5 rounded-xl border border-emerald-100">
+                        <div class="flex justify-between text-emerald-800 uppercase tracking-wide">
+                            <span>🌱 Mulberry Plantation Standard</span>
+                        </div>
+                        <div class="flex justify-between font-semibold mt-1">
+                            <span>Soil pH Range:</span>
+                            <span class="text-emerald-700">6.2 - 6.8</span>
+                        </div>
+                        <div class="flex justify-between font-semibold">
+                            <span>Optimal Temperature:</span>
+                            <span class="text-emerald-700">20 - 30°C</span>
+                        </div>
+                        <div class="flex justify-between font-semibold">
+                            <span>Soil Moisture Level:</span>
+                            <span class="text-emerald-700">60 - 80%</span>
+                        </div>
                     </div>
                 </div>
-                <div class="mt-4 flex items-center justify-between text-sm">
-                    <span class="text-green-600 font-medium">Optimal</span>
-                    <span class="text-gray-400">Target: 22°C - 24°C</span>
-                </div>
-                <div class="mt-4 pt-4 border-t border-gray-100">
-                    <span class="text-sm font-semibold text-gray-600">Bed Sensor Active</span>
-                </div>
+
             </div>
 
-            <!-- Soil Moisture Widget -->
-            <div class="glass-card bg-white p-6 rounded-2xl shadow-sm border-l-4 border-teal-400">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-sm font-bold text-gray-500 uppercase" data-translate="Soil Moisture">Soil Moisture</p>
-                        <h2 class="text-4xl font-extrabold text-mulberry-dark mt-1"><span id="arduinoSoil">45</span><span class="text-2xl text-gray-400">%</span></h2>
-                    </div>
-                    <div class="p-3 bg-teal-50 rounded-lg text-teal-500">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
-                    </div>
-                </div>
-                <div class="mt-4 flex items-center justify-between text-sm">
-                    <span class="text-green-600 font-medium">Adequate</span>
-                    <span class="text-gray-400">Target: 40% - 60%</span>
-                </div>
-                <div class="mt-4 pt-4 border-t border-gray-100">
-                     <span class="text-sm font-semibold text-gray-600">Bed Sensor Active</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Graph Section -->
-        <div class="glass-card bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <h3 class="text-lg font-bold text-mulberry-dark mb-4">24-Hour Climate Trend</h3>
-            <div class="w-full h-64 relative">
-                <canvas id="climateChart"></canvas>
-            </div>
+            <!-- Page Padding -->
+            <div class="pb-12"></div>
         </div>
 
     </main>
 
+    <!-- Master Control Scripts -->
     <script>
-        // Fetch real-time data from Arduino server
-        function updateArduinoData() {
+        // Central Sericulture Target Threshold Guideline Rules Database
+        const STAGE_CONFIG = {
+            incubation: {
+                name: "Incubation Stage",
+                tempMin: 25.0,
+                tempMax: 26.0,
+                humMin: 75.0,
+                humMax: 80.0,
+                description: "Optimal environment ensures uniform hatching of silkworm eggs. Keep lighting regulated.",
+                tip: "Maintain a photoperiod of 16 hours light and 8 hours dark for uniform embryonic development."
+            },
+            instar_1_2: {
+                name: "I & II Instar (Young Larva / Chowki)",
+                tempMin: 27.0,
+                tempMax: 28.0,
+                humMin: 80.0,
+                humMax: 90.0,
+                description: "Chowki rearing requires high temperature and relative humidity to keep chopped tender leaves fresh.",
+                tip: "Feed chopped tender leaves from top branches. High humidity prevents leaves from drying quickly."
+            },
+            instar_3: {
+                name: "III Instar (Chowki Larva)",
+                tempMin: 26.0,
+                tempMax: 27.0,
+                humMin: 75.0,
+                humMax: 80.0,
+                description: "Transition stage between young aged and late aged silkworms. Moderate environmental control.",
+                tip: "Increase bed space as larvae grow rapidly. Ensure proper ventilation."
+            },
+            instar_4: {
+                name: "IV Instar (Late Larva)",
+                tempMin: 25.0,
+                tempMax: 26.0,
+                humMin: 70.0,
+                humMax: 75.0,
+                description: "Silkworms eat vigorously. Higher ventilation and cooler temperatures are needed.",
+                tip: "Peak feeding phase begins. Keep the rearing bed clean and thin to avoid micro-climate heat traps."
+            },
+            instar_5: {
+                name: "V Instar (Late Larva)",
+                tempMin: 24.0,
+                tempMax: 25.0,
+                humMin: 65.0,
+                humMax: 70.0,
+                description: "Final feeding stage before spinning. Crucial stage for silk gland development. Vigorously feeds on mature leaves.",
+                tip: "Keep bed moisture low. Overcrowding and high heat in this stage can lead to grasserie disease outbreaks."
+            },
+            moulting: {
+                name: "Moulting Stage",
+                tempMin: 25.0,
+                tempMax: 26.0,
+                humMin: 60.0,
+                humMax: 65.0,
+                description: "Silkworms shed their skin. They stop eating and need dry, warm, and well-ventilated quiet conditions.",
+                tip: "Do NOT feed during moulting. Dust the rearing bed with slaked lime to absorb moisture and maintain dry conditions."
+            },
+            spinning: {
+                name: "Spinning & Cocoon Formation",
+                tempMin: 24.0,
+                tempMax: 25.0,
+                humMin: 65.0,
+                humMax: 70.0,
+                description: "Larvae climb onto mountages (chandrika) to spin cocoons. Low humidity and mild warmth are required for premium silk quality.",
+                tip: "Provide proper spacing on mountages to avoid double cocoons. Ensure good air circulation to dry urine and spin high-quality silk."
+            }
+        };
+
+        const MULBERRY_CONFIG = {
+            name: "Mulberry Plantation",
+            phMin: 6.2,
+            phMax: 6.8,
+            tempMin: 20.0,
+            tempMax: 30.0,
+            humMin: 65.0,
+            humMax: 80.0,
+            moistMin: 60.0,
+            moistMax: 80.0,
+            description: "Mulberry cultivation requires rich soil nutrients, slightly acidic soil, and high soil moisture for high leaf yield.",
+            tip: "Maintain soil pH around 6.5. If soil pH drops below 6.2, apply agricultural lime (calcium carbonate). If above 6.8, use organic manure or sulfur."
+        };
+
+        let currentStage = 'instar_4'; // default
+        let isSimulationEnabled = true;
+
+        // Current real-time IoT states
+        let readings = {
+            airTemp: 26.5,
+            airHumidity: 72.0,
+            soilPh: 6.5,
+            soilMoisture: 65
+        };
+
+        // DOM elements
+        const toggleSimCheckbox = { checked: true }; // Mock to prevent errors and keep simulator forced ON
+        const simulationDrawer = document.getElementById('simulationDrawer');
+        
+        // Sim Sliders
+        const simTemp = document.getElementById('simTemp');
+        const simHum = document.getElementById('simHum');
+        const simPh = document.getElementById('simPh');
+        const simMoist = document.getElementById('simMoist');
+        
+        // Sim Slider values
+        const simTempVal = document.getElementById('simTempVal');
+        const simHumVal = document.getElementById('simHumVal');
+        const simPhVal = document.getElementById('simPhVal');
+        const simMoistVal = document.getElementById('simMoistVal');
+
+        // Actuators checkbox switches
+        const exhaustFanToggle = document.getElementById('exhaustFanToggle');
+        const humidifierToggle = document.getElementById('humidifierToggle');
+        const phDoserToggle = document.getElementById('phDoserToggle');
+        const irrigationToggle = document.getElementById('irrigationToggle');
+
+        // Chart variable reference & real-time rolling metrics log
+        let climateChart = null;
+        let tempHistory = [];
+        let humHistory = [];
+        let timeHistory = [];
+
+        // Seed 24 points to represent initial running history leading up to current minute
+        function seedRealtimeHistory() {
+            tempHistory = [];
+            humHistory = [];
+            timeHistory = [];
+            const now = new Date();
+            for (let i = 24; i >= 0; i--) {
+                const pastTime = new Date(now.getTime() - i * 60000);
+                const timeStr = pastTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                timeHistory.push(timeStr);
+                
+                // Seeding values with natural fluctuations within reasonable boundaries
+                const baseTemp = 25.4 + Math.sin(i * 0.4) * 0.8;
+                const baseHum = 72.0 + Math.cos(i * 0.4) * 3.0;
+                tempHistory.push(baseTemp);
+                humHistory.push(baseHum);
+            }
+        }
+        seedRealtimeHistory();
+
+        // Calculate and render running average of last 24 records (representing a rolling log of historical points)
+        function calculate24hAverages() {
+            if (tempHistory.length === 0) return;
+            const avgTemp = tempHistory.reduce((sum, val) => sum + val, 0) / tempHistory.length;
+            const avgHum = humHistory.reduce((sum, val) => sum + val, 0) / humHistory.length;
+            
+            document.getElementById('avg24Temp').textContent = avgTemp.toFixed(1) + '°C';
+            document.getElementById('avg24Hum').textContent = avgHum.toFixed(0) + '%';
+        }
+
+        // Add a new logged data point every minute
+        function logMinuteData() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+            
+            timeHistory.push(timeStr);
+            tempHistory.push(readings.airTemp);
+            humHistory.push(readings.airHumidity);
+            
+            // Keep last 30 data points in rolling window on the chart
+            if (timeHistory.length > 30) {
+                timeHistory.shift();
+                tempHistory.shift();
+                humHistory.shift();
+            }
+            
+            if (climateChart) {
+                climateChart.data.labels = timeHistory;
+                climateChart.data.datasets[0].data = tempHistory;
+                climateChart.data.datasets[1].data = humHistory;
+                climateChart.update();
+            }
+            
+            calculate24hAverages();
+        }
+
+        // Initialize Page
+        document.addEventListener('DOMContentLoaded', () => {
+            setupFarmerName();
+            initChart();
+            switchStage(currentStage);
+            handleSimulationToggle();
+            
+            // Perform first averages calculation
+            calculate24hAverages();
+            
+            // Slider Listeners
+            simTemp.addEventListener('input', (e) => {
+                readings.airTemp = parseFloat(e.target.value);
+                simTempVal.textContent = readings.airTemp.toFixed(1) + ' °C';
+                updateDashboard();
+            });
+            simHum.addEventListener('input', (e) => {
+                readings.airHumidity = parseFloat(e.target.value);
+                simHumVal.textContent = readings.airHumidity.toFixed(1) + ' %';
+                updateDashboard();
+            });
+            simPh.addEventListener('input', (e) => {
+                readings.soilPh = parseFloat(e.target.value);
+                simPhVal.textContent = readings.soilPh.toFixed(1) + ' pH';
+                updateDashboard();
+            });
+            simMoist.addEventListener('input', (e) => {
+                readings.soilMoisture = parseInt(e.target.value);
+                simMoistVal.textContent = readings.soilMoisture + ' %';
+                updateDashboard();
+            });
+
+            // Log data points every 60 seconds (1 minute)
+            setInterval(logMinuteData, 60000);
+
+            // Enabled notification dropdown bell toggle trigger
+            const bellBtn = document.getElementById('notificationBellBtn');
+            const dropdown = document.getElementById('notificationDropdown');
+            if (bellBtn && dropdown) {
+                bellBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    dropdown.classList.toggle('hidden');
+                });
+                document.addEventListener('click', () => {
+                    dropdown.classList.add('hidden');
+                });
+                dropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+        });
+
+        // Set farmer name from localstorage
+        function setupFarmerName() {
+            const name = localStorage.getItem('farmerName') || 'Ramesh Patil';
+            const sidebarName = document.getElementById('sidebar-farmer-name');
+            if (sidebarName) sidebarName.textContent = name;
+        }
+
+        // Toggle simulator panel display & toggle logic
+        function handleSimulationToggle() {
+            isSimulationEnabled = toggleSimCheckbox.checked;
+            
+            const liveDot = document.getElementById('liveDot');
+            const liveDotPing = document.getElementById('liveDotPing');
+            const liveStatusText = document.getElementById('liveStatusText');
+
+            if (isSimulationEnabled) {
+                simulationDrawer.classList.remove('hidden');
+                liveDot.style.backgroundColor = '#fb923c'; // orange
+                liveDotPing.style.backgroundColor = '#fb923c';
+                liveStatusText.textContent = "Simulation Mode Active";
+                
+                // Read from sliders immediately
+                readings.airTemp = parseFloat(simTemp.value);
+                readings.airHumidity = parseFloat(simHum.value);
+                readings.soilPh = parseFloat(simPh.value);
+                readings.soilMoisture = parseInt(simMoist.value);
+                updateDashboard();
+            } else {
+                simulationDrawer.classList.add('hidden');
+                liveDot.style.backgroundColor = '#3b82f6'; // blue (searching)
+                liveDotPing.style.backgroundColor = '#3b82f6';
+                liveStatusText.textContent = "Checking Arduino Port...";
+                fetchArduinoData();
+            }
+        }
+
+        // Switch Stage and recalculate guidelines
+        function switchStage(stageKey) {
+            currentStage = stageKey;
+            const stage = STAGE_CONFIG[stageKey];
+            
+            // 1. Update text fields (if they exist)
+            const titleElem = document.getElementById('activeStageTitle');
+            const descElem = document.getElementById('activeStageDesc');
+            const tipElem = document.getElementById('activeStageTip');
+            if (titleElem) titleElem.textContent = stage.name;
+            if (descElem) descElem.textContent = stage.description;
+            if (tipElem) tipElem.textContent = stage.tip;
+
+            // 2. Update pill active states
+            document.querySelectorAll('.stage-btn').forEach(btn => {
+                btn.classList.remove('bg-mulberry', 'text-white', 'border-mulberry', 'shadow-md');
+                btn.classList.add('bg-white', 'text-gray-500', 'border-transparent', 'hover:bg-gray-50');
+            });
+            const activeBtn = document.getElementById(`btn-${stageKey}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-white', 'text-gray-500', 'border-transparent', 'hover:bg-gray-50');
+                activeBtn.classList.add('bg-mulberry', 'text-white', 'border-mulberry', 'shadow-md');
+            }
+
+            // 3. Update Scientific Guideline desk highlighting
+            document.querySelectorAll('[id^="row-"]').forEach(row => {
+                row.classList.remove('bg-mulberry/10', 'border-mulberry/30', 'scale-[1.02]', 'shadow-sm');
+                row.classList.add('bg-transparent', 'border-gray-100');
+            });
+            document.querySelectorAll('[id^="dot-"]').forEach(dot => {
+                dot.classList.remove('bg-mulberry', 'animate-pulse');
+                dot.classList.add('bg-gray-300');
+            });
+
+            const activeRow = document.getElementById(`row-${stageKey}`);
+            if (activeRow) {
+                activeRow.classList.remove('bg-transparent', 'border-gray-100');
+                activeRow.classList.add('bg-mulberry/10', 'border-mulberry/30', 'scale-[1.02]', 'shadow-sm');
+            }
+            const activeDot = document.getElementById(`dot-${stageKey}`);
+            if (activeDot) {
+                activeDot.classList.remove('bg-gray-300');
+                activeDot.classList.add('bg-mulberry', 'animate-pulse');
+            }
+
+            // 4. Update widget target labels
+            document.getElementById('tempTargetLabel').textContent = `Target: ${stage.tempMin} - ${stage.tempMax}°C`;
+            document.getElementById('humTargetLabel').textContent = `Target: ${stage.humMin} - ${stage.humMax}%`;
+
+            // 5. Update chart bands
+            updateChartOptimalBands();
+
+            // 6. Refresh calculations
+            updateDashboard();
+        }
+
+        // Recalculate and render whole dashboard state
+        function updateDashboard() {
+            const stage = STAGE_CONFIG[currentStage];
+            const activeAlerts = [];
+            
+            // ----------------------------------------------------
+            // 1. Temperature Evaluation
+            // ----------------------------------------------------
+            const currentTemp = readings.airTemp;
+            document.getElementById('cardTemp').textContent = currentTemp.toFixed(1);
+            document.getElementById('headerTemp').textContent = currentTemp.toFixed(1) + '°C';
+            
+            const tempStatus = document.getElementById('tempStatusBadge');
+            const tempCardBorder = document.getElementById('tempCardBorder');
+            const tempIconBox = document.getElementById('tempIconBox');
+            const tempIcon = document.getElementById('tempIcon');
+            const fanActuatorIcon = document.getElementById('fanActuatorIcon');
+
+            // Exact limits: Optimal. Bounds +/- 3: Normal. Beyond +/- 3: Alert.
+            const isTempAlert = currentTemp > (stage.tempMax + 3.0) || currentTemp < (stage.tempMin - 3.0);
+            const isTempExact = currentTemp >= stage.tempMin && currentTemp <= stage.tempMax;
+
+            if (isTempAlert) {
+                tempStatus.textContent = "🚨 Alert";
+                tempStatus.className = "px-2 py-0.5 rounded bg-red-600 text-white animate-pulse";
+                tempCardBorder.style.borderLeftColor = "#dc2626"; // Red
+                tempIconBox.className = "p-2.5 rounded-xl text-red-600 bg-red-50 animate-pulse";
+                tempIcon.className = "ph ph-warning-octagon text-2xl";
+                
+                if (currentTemp > stage.tempMax + 3.0) {
+                    activeAlerts.push(`Temp (${currentTemp.toFixed(1)}°C) is critically hot (exceeds target ${stage.tempMax}°C by >3°C)!`);
+                } else {
+                    activeAlerts.push(`Temp (${currentTemp.toFixed(1)}°C) is critically cold (below target ${stage.tempMin}°C by >3°C)!`);
+                }
+            } else if (isTempExact) {
+                tempStatus.textContent = "✓ Optimal Range";
+                tempStatus.className = "px-2 py-0.5 rounded bg-emerald-100 text-emerald-800";
+                tempCardBorder.style.borderLeftColor = "#10b981"; // Emerald
+                tempIconBox.className = "p-2.5 rounded-xl text-emerald-500 bg-emerald-50";
+                tempIcon.className = "ph ph-thermometer text-2xl";
+            } else {
+                tempStatus.textContent = "✓ Normal Range";
+                tempStatus.className = "px-2 py-0.5 rounded bg-green-100 text-green-700";
+                tempCardBorder.style.borderLeftColor = "#22c55e"; // Green
+                tempIconBox.className = "p-2.5 rounded-xl text-green-500 bg-green-50";
+                tempIcon.className = "ph ph-thermometer text-2xl";
+            }
+
+            // Auto trigger fans
+            if (currentTemp > stage.tempMax) {
+                exhaustFanToggle.checked = true;
+                fanActuatorIcon.className = "ph ph-wind text-lg text-orange-500 fan-spin";
+            } else {
+                exhaustFanToggle.checked = false;
+                fanActuatorIcon.className = "ph ph-wind text-lg text-gray-400";
+            }
+
+            if (exhaustFanToggle.checked) {
+                fanActuatorIcon.className = "ph ph-wind text-lg text-orange-500 fan-spin";
+            }
+
+            // ----------------------------------------------------
+            // 2. Humidity Evaluation
+            // ----------------------------------------------------
+            const currentHum = readings.airHumidity;
+            document.getElementById('cardHum').textContent = currentHum.toFixed(1);
+            document.getElementById('headerHum').textContent = currentHum.toFixed(0) + '%';
+            
+            const humStatus = document.getElementById('humStatusBadge');
+            const humCardBorder = document.getElementById('humCardBorder');
+            const humIconBox = document.getElementById('humIconBox');
+            const humIcon = document.getElementById('humIcon');
+            const humidifierActuatorIcon = document.getElementById('humidifierActuatorIcon');
+
+            // Exact limits: Optimal. Bounds +/- 3: Normal. Beyond +/- 3: Alert.
+            const isHumAlert = currentHum > (stage.humMax + 3.0) || currentHum < (stage.humMin - 3.0);
+            const isHumExact = currentHum >= stage.humMin && currentHum <= stage.humMax;
+
+            if (isHumAlert) {
+                humStatus.textContent = "🚨 Alert";
+                humStatus.className = "px-2 py-0.5 rounded bg-red-600 text-white animate-pulse";
+                humCardBorder.style.borderLeftColor = "#dc2626"; // Red
+                humIconBox.className = "p-2.5 rounded-xl text-red-600 bg-red-50 animate-pulse";
+                humIcon.className = "ph ph-warning-octagon text-2xl";
+                
+                if (currentHum > stage.humMax + 3.0) {
+                    activeAlerts.push(`Humidity (${currentHum.toFixed(1)}%) is critically high (exceeds target ${stage.humMax}% by >3%)!`);
+                } else {
+                    activeAlerts.push(`Humidity (${currentHum.toFixed(1)}%) is critically dry (below target ${stage.humMin}% by >3%)!`);
+                }
+            } else if (isHumExact) {
+                humStatus.textContent = "✓ Optimal Range";
+                humStatus.className = "px-2 py-0.5 rounded bg-emerald-100 text-emerald-800";
+                humCardBorder.style.borderLeftColor = "#10b981"; // Emerald
+                humIconBox.className = "p-2.5 rounded-xl text-emerald-500 bg-emerald-50";
+                humIcon.className = "ph ph-drop text-2xl";
+            } else {
+                humStatus.textContent = "✓ Normal Range";
+                humStatus.className = "px-2 py-0.5 rounded bg-green-100 text-green-700";
+                humCardBorder.style.borderLeftColor = "#22c55e"; // Green
+                humIconBox.className = "p-2.5 rounded-xl text-green-500 bg-green-50";
+                humIcon.className = "ph ph-drop text-2xl";
+            }
+
+            // Humidifier triggers
+            if (currentHum < stage.humMin) {
+                humidifierToggle.checked = true;
+                humidifierActuatorIcon.className = "ph ph-cloud-fog text-lg text-blue-500 mist-pulse";
+            } else {
+                humidifierToggle.checked = false;
+                humidifierActuatorIcon.className = "ph ph-cloud-fog text-lg text-gray-400";
+            }
+
+            if (humidifierToggle.checked) {
+                humidifierActuatorIcon.className = "ph ph-cloud-fog text-lg text-blue-500 mist-pulse";
+            }
+
+            // ----------------------------------------------------
+            // 3. Soil pH Evaluation
+            // ----------------------------------------------------
+            const currentPh = readings.soilPh;
+            document.getElementById('cardPh').textContent = currentPh.toFixed(1);
+            
+            // Map 4.0 - 9.0 to 0% - 100% position on the visual pointer line
+            const percentagePos = ((currentPh - 4.0) / (9.0 - 4.0)) * 100;
+            document.getElementById('phPointer').style.left = `calc(${percentagePos}% - 7px)`;
+            
+            const phStatus = document.getElementById('phStatusBadge');
+            const phCardBorder = document.getElementById('phCardBorder');
+            const phIconBox = document.getElementById('phIconBox');
+            const phIcon = document.getElementById('phIcon');
+            const doserActuatorIcon = document.getElementById('doserActuatorIcon');
+
+            // Exact limits: Optimal. Bounds +/- 3: Normal. Beyond +/- 3: Alert.
+            const isPhAlert = currentPh > (MULBERRY_CONFIG.phMax + 3.0) || currentPh < (MULBERRY_CONFIG.phMin - 3.0);
+            const isPhExact = currentPh >= MULBERRY_CONFIG.phMin && currentPh <= MULBERRY_CONFIG.phMax;
+
+            if (isPhAlert) {
+                phStatus.textContent = "🚨 Alert";
+                phStatus.className = "px-2 py-0.5 rounded bg-red-600 text-white animate-pulse";
+                phCardBorder.style.borderLeftColor = "#dc2626"; // Red
+                phIconBox.className = "p-2.5 rounded-xl text-red-600 bg-red-50 animate-pulse";
+                phIcon.className = "ph ph-warning-octagon text-2xl";
+                
+                if (currentPh > MULBERRY_CONFIG.phMax + 3.0) {
+                    activeAlerts.push(`Soil pH (${currentPh.toFixed(1)}) is critically alkaline (exceeds target ${MULBERRY_CONFIG.phMax} by >3)!`);
+                } else {
+                    activeAlerts.push(`Soil pH (${currentPh.toFixed(1)}) is critically acidic (below target ${MULBERRY_CONFIG.phMin} by >3)!`);
+                }
+            } else if (isPhExact) {
+                phStatus.textContent = "✓ Optimal Range";
+                phStatus.className = "px-2 py-0.5 rounded bg-emerald-100 text-emerald-800";
+                phCardBorder.style.borderLeftColor = "#10b981"; // Emerald
+                phIconBox.className = "p-2.5 rounded-xl text-emerald-500 bg-emerald-50";
+                phIcon.className = "ph ph-flask text-2xl";
+            } else {
+                phStatus.textContent = "✓ Normal Range";
+                phStatus.className = "px-2 py-0.5 rounded bg-green-100 text-green-700";
+                phCardBorder.style.borderLeftColor = "#22c55e"; // Green
+                phIconBox.className = "p-2.5 rounded-xl text-green-500 bg-green-50";
+                phIcon.className = "ph ph-flask text-2xl";
+            }
+
+            // Doser triggers
+            if (currentPh < MULBERRY_CONFIG.phMin || currentPh > MULBERRY_CONFIG.phMax) {
+                phDoserToggle.checked = true;
+                doserActuatorIcon.className = "ph ph-drop-half-bottom text-lg text-emerald-500 dose-shake";
+            } else {
+                phDoserToggle.checked = false;
+                doserActuatorIcon.className = "ph ph-drop-half-bottom text-lg text-gray-400";
+            }
+
+            if (phDoserToggle.checked) {
+                doserActuatorIcon.className = "ph ph-drop-half-bottom text-lg text-emerald-500 dose-shake";
+            }
+
+            // ----------------------------------------------------
+            // 4. Soil Moisture Evaluation
+            // ----------------------------------------------------
+            const currentMoist = readings.soilMoisture;
+            document.getElementById('cardMoist').textContent = currentMoist;
+            
+            const moistStatus = document.getElementById('moistStatusBadge');
+            const moistCardBorder = document.getElementById('moistCardBorder');
+            const moistIconBox = document.getElementById('moistIconBox');
+            const moistIcon = document.getElementById('moistIcon');
+            const irrigationActuatorIcon = document.getElementById('irrigationActuatorIcon');
+
+            // Exact limits: Optimal. Bounds +/- 3: Normal. Beyond +/- 3: Alert.
+            const isMoistAlert = currentMoist > (MULBERRY_CONFIG.moistMax + 3.0) || currentMoist < (MULBERRY_CONFIG.moistMin - 3.0);
+            const isMoistExact = currentMoist >= MULBERRY_CONFIG.moistMin && currentMoist <= MULBERRY_CONFIG.moistMax;
+
+            if (isMoistAlert) {
+                moistStatus.textContent = "🚨 Alert";
+                moistStatus.className = "px-2 py-0.5 rounded bg-red-600 text-white animate-pulse";
+                moistCardBorder.style.borderLeftColor = "#dc2626"; // Red
+                moistIconBox.className = "p-2.5 rounded-xl text-red-600 bg-red-50 animate-pulse";
+                moistIcon.className = "ph ph-warning-octagon text-2xl";
+                
+                if (currentMoist > MULBERRY_CONFIG.moistMax + 3.0) {
+                    activeAlerts.push(`Moisture (${currentMoist}%) is critically high (exceeds target ${MULBERRY_CONFIG.moistMax}% by >3%)!`);
+                } else {
+                    activeAlerts.push(`Moisture (${currentMoist}%) is critically dry (below target ${MULBERRY_CONFIG.moistMin}% by >3%)!`);
+                }
+            } else if (isMoistExact) {
+                moistStatus.textContent = "✓ Optimal Range";
+                moistStatus.className = "px-2 py-0.5 rounded bg-emerald-100 text-emerald-800";
+                moistCardBorder.style.borderLeftColor = "#10b981"; // Emerald
+                moistIconBox.className = "p-2.5 rounded-xl text-emerald-500 bg-emerald-50";
+                moistIcon.className = "ph ph-plant text-2xl";
+            } else {
+                moistStatus.textContent = "✓ Normal Range";
+                moistStatus.className = "px-2 py-0.5 rounded bg-green-100 text-green-700";
+                moistCardBorder.style.borderLeftColor = "#22c55e"; // Green
+                moistIconBox.className = "p-2.5 rounded-xl text-green-500 bg-green-50";
+                moistIcon.className = "ph ph-plant text-2xl";
+            }
+
+            // Irrigation triggers
+            if (currentMoist < MULBERRY_CONFIG.moistMin) {
+                irrigationToggle.checked = true;
+                irrigationActuatorIcon.className = "ph ph-sprinkler text-lg text-teal-500 drip-anim";
+            } else {
+                irrigationToggle.checked = false;
+                irrigationActuatorIcon.className = "ph ph-sprinkler text-lg text-gray-400";
+            }
+
+            if (irrigationToggle.checked) {
+                irrigationActuatorIcon.className = "ph ph-sprinkler text-lg text-teal-500 drip-anim";
+            }
+
+            // ----------------------------------------------------
+            // 5. Central Ecosystem Alerts Banner Render
+            // ----------------------------------------------------
+            const alertBanner = document.getElementById('criticalAlertBanner');
+            const alertList = document.getElementById('criticalAlertList');
+
+            if (activeAlerts.length > 0) {
+                alertBanner.classList.remove('hidden');
+                alertList.innerHTML = '';
+                activeAlerts.forEach(message => {
+                    const li = document.createElement('div');
+                    li.className = "flex items-center gap-1.5 py-0.5";
+                    li.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-red-600 flex-shrink-0 animate-ping"></span><span>${message}</span>`;
+                    alertList.appendChild(li);
+                });
+            } else {
+                alertBanner.classList.add('hidden');
+            }
+
+            // Update Enabled Notification Dropdown contents
+            const notifBadge = document.getElementById('notificationBadge');
+            const notifList = document.getElementById('notificationList');
+            const notifCount = document.getElementById('activeAlertCount');
+            
+            if (activeAlerts.length > 0) {
+                if (notifBadge) notifBadge.classList.remove('hidden');
+                if (notifCount) notifCount.textContent = `${activeAlerts.length} Active`;
+                if (notifList) {
+                    notifList.innerHTML = '';
+                    activeAlerts.forEach(message => {
+                        const div = document.createElement('div');
+                        div.className = "p-2.5 rounded-xl bg-red-50/70 border border-red-100/50 flex items-start gap-2 text-xs font-semibold text-red-800 transition-all hover:bg-red-50";
+                        div.innerHTML = `
+                            <i class="ph ph-warning-octagon text-lg text-red-600 mt-0.5 animate-pulse"></i>
+                            <div class="flex-1">${message}</div>
+                        `;
+                        notifList.appendChild(div);
+                    });
+                }
+            } else {
+                if (notifBadge) notifBadge.classList.add('hidden');
+                if (notifCount) notifCount.textContent = `0 Active`;
+                if (notifList) {
+                    notifList.innerHTML = `
+                        <div class="p-6 text-center text-gray-400">
+                            <i class="ph ph-sparkle text-3xl text-yellow-400 animate-pulse" style="animation-duration: 4s;"></i>
+                            <p class="text-xs font-bold mt-2 text-gray-600">All Climate Parameters Optimal</p>
+                            <p class="text-[10px] font-semibold text-gray-400 mt-0.5">No active rearing alarms detected</p>
+                        </div>
+                    `;
+                }
+            }
+
+            // Update latest point on the graph in real-time
+            if (tempHistory.length > 0) {
+                tempHistory[tempHistory.length - 1] = readings.airTemp;
+            }
+            if (humHistory.length > 0) {
+                humHistory[humHistory.length - 1] = readings.airHumidity;
+            }
+            if (climateChart) {
+                climateChart.data.datasets[0].data = tempHistory;
+                climateChart.data.datasets[1].data = humHistory;
+                climateChart.update('none');
+            }
+        }
+
+        // Fetch sensor readings from Python Flask server on port 5000 (graceful fallbacks)
+        function fetchArduinoData() {
+            if (isSimulationEnabled) return; // ignore if simulating
+
+            const liveDot = document.getElementById('liveDot');
+            const liveDotPing = document.getElementById('liveDotPing');
+            const liveStatusText = document.getElementById('liveStatusText');
+
             fetch('http://localhost:5000/api/data')
                 .then(r => r.json())
                 .then(data => {
-                    if (data.airTemp !== -999) document.getElementById('arduinoTemp').textContent = data.airTemp.toFixed(1);
-                    if (data.airHumidity !== -999) document.getElementById('arduinoHum').textContent = data.airHumidity.toFixed(1);
-                    if (data.soilMoisture !== -999) document.getElementById('arduinoSoil').textContent = data.soilMoisture;
-                })
-                .catch(e => console.log('Arduino server not available'));
-        }
-        updateArduinoData();
-        setInterval(updateArduinoData, 5000);
-
-        // Chart Initialization
-        const ctx = document.getElementById('climateChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['12 AM', '3 AM', '6 AM', '9 AM', '12 PM', '3 PM', '6 PM', '9 PM'],
-                datasets: [
-                    {
-                        label: 'Temperature (°C)',
-                        data: [22, 21, 21.5, 24, 26.5, 27, 25, 23],
-                        borderColor: '#fb923c',
-                        backgroundColor: 'rgba(251, 146, 60, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    },
-                    {
-                        label: 'Humidity (%)',
-                        data: [80, 82, 85, 78, 72, 68, 75, 79],
-                        borderColor: '#60a5fa',
-                        backgroundColor: 'rgba(96, 165, 250, 0.0)',
-                        tension: 0.4,
-                        yAxisID: 'y1'
+                    // Check if server returns actual serial readings
+                    if (data.airTemp !== -999) {
+                        readings.airTemp = data.airTemp;
+                        readings.airHumidity = data.airHumidity;
+                        readings.soilMoisture = data.soilMoisture;
+                        
+                        liveDot.style.backgroundColor = '#22c55e'; // active green
+                        liveDotPing.style.backgroundColor = '#22c55e';
+                        liveStatusText.textContent = "Arduino Active - Port COM3";
+                        
+                        updateDashboard();
+                    } else {
+                        liveDot.style.backgroundColor = '#f59e0b'; // warning amber
+                        liveDotPing.style.backgroundColor = '#f59e0b';
+                        liveStatusText.textContent = "Arduino online, sensor error";
                     }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
+                })
+                .catch(e => {
+                    liveDot.style.backgroundColor = '#ef4444'; // error red
+                    liveDotPing.style.backgroundColor = '#ef4444';
+                    liveStatusText.textContent = "Arduino Offline";
+                });
+        }
+
+        // Chart Initialization (dynamic optimal limits drawing)
+        function initChart() {
+            const ctx = document.getElementById('climateChart').getContext('2d');
+            
+            // Gradient for Temperature Line
+            const tempGradient = ctx.createLinearGradient(0, 0, 0, 300);
+            tempGradient.addColorStop(0, 'rgba(251, 146, 60, 0.4)');
+            tempGradient.addColorStop(1, 'rgba(251, 146, 60, 0.0)');
+
+            // Gradient for Humidity Line
+            const humGradient = ctx.createLinearGradient(0, 0, 0, 300);
+            humGradient.addColorStop(0, 'rgba(59, 130, 246, 0.15)');
+            humGradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+
+            climateChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: timeHistory,
+                    datasets: [
+                        {
+                            label: 'Temp (°C)',
+                            data: tempHistory,
+                            borderColor: '#fb923c', // Orange
+                            backgroundColor: tempGradient,
+                            borderWidth: 3.5,
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: '#ffffff',
+                            pointBorderColor: '#fb923c',
+                            pointBorderWidth: 2
+                        },
+                        {
+                            label: 'Humidity (%)',
+                            data: humHistory,
+                            borderColor: '#3b82f6', // Blue
+                            backgroundColor: humGradient,
+                            borderWidth: 3.5,
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: '#ffffff',
+                            pointBorderColor: '#3b82f6',
+                            pointBorderWidth: 2,
+                            yAxisID: 'y1'
+                        }
+                    ]
                 },
-                scales: {
-                    y: {
-                        type: 'linear',
-                        display: true,
-                        position: 'left',
-                        title: { display: true, text: 'Temp (°C)' }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
                     },
-                    y1: {
-                        type: 'linear',
-                        display: true,
-                        position: 'right',
-                        title: { display: true, text: 'Humidity (%)' },
-                        grid: { drawOnChartArea: false }
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(31, 41, 55, 0.95)', // Sleek dark slate theme
+                            titleFont: { family: 'Manrope', size: 13, weight: 'bold' },
+                            bodyFont: { family: 'Manrope', size: 12, weight: '600' },
+                            padding: 12,
+                            borderRadius: 12,
+                            borderColor: 'rgba(87, 99, 65, 0.2)',
+                            borderWidth: 1,
+                            displayColors: true,
+                            callbacks: {
+                                title: function(context) {
+                                    return '🕒 Time: ' + context[0].label;
+                                },
+                                label: function(context) {
+                                    const value = context.parsed.y;
+                                    if (context.datasetIndex === 0) {
+                                        return '🌡️ Temperature: ' + value.toFixed(1) + ' °C';
+                                    } else {
+                                        return '💧 Humidity: ' + value.toFixed(1) + ' %';
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: false // Completely hides the x-axis time labels to avoid cluttering as requested
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: 'Temp (°C)', font: { family: 'Manrope', weight: 'bold' }, color: '#9ca3af' },
+                            grid: { color: '#f3f4f6' },
+                            ticks: { font: { family: 'Manrope', weight: 'bold' }, color: '#9ca3af' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: { display: true, text: 'Humidity (%)', font: { family: 'Manrope', weight: 'bold' }, color: '#9ca3af' },
+                            grid: { drawOnChartArea: false },
+                            ticks: { font: { family: 'Manrope', weight: 'bold' }, color: '#9ca3af' }
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
+
+        // Draw optimal reference line bands inside Chart.js
+        function updateChartOptimalBands() {
+            if (!climateChart) return;
+            const stage = STAGE_CONFIG[currentStage];
+            
+            // Simply update chart subtitle or dynamic annotations if loaded.
+            // Since vanilla Chart.js doesn't support drawArea easily without the annotation plugin, 
+            // we will simulate an amazing premium visual effect by adjusting chart ticks/scales or updating chart options titles!
+            climateChart.options.scales.y.suggestedMin = stage.tempMin - 3;
+            climateChart.options.scales.y.suggestedMax = stage.tempMax + 3;
+            climateChart.options.scales.y1.suggestedMin = stage.humMin - 10;
+            climateChart.options.scales.y1.suggestedMax = stage.humMax + 10;
+            climateChart.update();
+        }
     </script>
 </body>
 

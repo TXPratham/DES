@@ -22,7 +22,7 @@
             <h1 class="text-3xl font-extrabold text-mulberry-dark">Platform Settings</h1>
         </div>
 
-        <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 mb-8">
+        <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 mb-8 animate-slide-up">
             <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
                 <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center">
                     <i class="ph ph-translate text-xl"></i>
@@ -51,6 +51,139 @@
                 </label>
             </div>
         </div>
+
+        <!-- Notifications Settings Card -->
+        <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 mb-8 animate-slide-up delay-100">
+            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                <div class="w-10 h-10 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center">
+                    <i class="ph ph-bell text-xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Notification Settings</h2>
+                    <p class="text-sm font-medium text-gray-500">Configure how and when you want to receive rearing house alerts</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                    <div>
+                        <h4 class="font-bold text-gray-800">Critical Climate Alarms</h4>
+                        <p class="text-xs text-gray-500 font-medium">Alerts for extreme temperatures or humidity in the rearing house</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="climateAlarmsToggle" class="sr-only peer" checked onchange="saveSetting('climateAlarms', this.checked)">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-mulberry"></div>
+                    </label>
+                </div>
+
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                    <div>
+                        <h4 class="font-bold text-gray-800">Daily Task Reminders</h4>
+                        <p class="text-xs text-gray-500 font-medium">Remind feeding schedules, bed cleaning, and disinfectant application times</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="taskRemindersToggle" class="sr-only peer" checked onchange="saveSetting('taskReminders', this.checked)">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-mulberry"></div>
+                    </label>
+                </div>
+
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                    <div>
+                        <h4 class="font-bold text-gray-800">Market Price Updates</h4>
+                        <p class="text-xs text-gray-500 font-medium">Get notified of daily price fluctuations in local cocoon exchanges</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="marketUpdatesToggle" class="sr-only peer" checked onchange="saveSetting('marketUpdates', this.checked)">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-mulberry"></div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rearing Settings Card -->
+        <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 mb-8 animate-slide-up delay-200">
+            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center">
+                    <i class="ph ph-gear-six text-xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">IoT & Rearing Preferences</h2>
+                    <p class="text-sm font-medium text-gray-500">Configure IoT metrics and server endpoints</p>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Temperature Unit -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Temperature Unit</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="tempUnit" value="C" class="peer sr-only" checked onchange="saveSetting('tempUnit', 'C')">
+                            <div class="text-center p-3 rounded-2xl border border-gray-200 peer-checked:border-mulberry peer-checked:bg-mulberry/10 peer-checked:text-mulberry font-bold text-sm text-gray-500 transition-all">Celsius (°C)</div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="tempUnit" value="F" class="peer sr-only" onchange="saveSetting('tempUnit', 'F')">
+                            <div class="text-center p-3 rounded-2xl border border-gray-200 peer-checked:border-mulberry peer-checked:bg-mulberry/10 peer-checked:text-mulberry font-bold text-sm text-gray-500 transition-all">Fahrenheit (°F)</div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Arduino Server Endpoint -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Arduino Server URL</label>
+                    <input type="text" id="arduinoServerUrl" class="w-full bg-gray-50 border border-gray-200 text-gray-800 font-bold rounded-xl focus:ring-mulberry focus:border-mulberry block p-3 outline-none" value="http://localhost:5000" onchange="saveSetting('arduinoServerUrl', this.value)">
+                    <p class="text-xs text-gray-400 mt-1">Local endpoint for fetching real-time DHT sensor data</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Actions Card -->
+        <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 mb-8 animate-slide-up delay-300">
+            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                <div class="w-10 h-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center">
+                    <i class="ph ph-user text-xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Account Options</h2>
+                    <p class="text-sm font-medium text-gray-500">Manage your profile session and stored data</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <a href="edit-profile.html" class="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-2xl border border-gray-100 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-pencil-simple text-xl text-gray-600"></i>
+                        <div>
+                            <h4 class="font-bold text-gray-800">Edit Profile Details</h4>
+                            <p class="text-xs text-gray-500 font-medium">Update your name, contact details, and location profile</p>
+                        </div>
+                    </div>
+                    <i class="ph ph-caret-right text-gray-400"></i>
+                </a>
+
+                <button onclick="clearAppData()" class="w-full text-left flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-2xl border border-gray-100 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-trash text-xl text-orange-500"></i>
+                        <div>
+                            <h4 class="font-bold text-gray-800">Clear Application Cache</h4>
+                            <p class="text-xs text-gray-500 font-medium">Reset localized storage values to default settings</p>
+                        </div>
+                    </div>
+                    <i class="ph ph-caret-right text-gray-400"></i>
+                </button>
+
+                <button onclick="logout()" class="w-full text-left flex items-center justify-between p-4 bg-red-50 hover:bg-red-100/80 rounded-2xl border border-red-100 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-sign-out text-xl text-red-600"></i>
+                        <div>
+                            <h4 class="font-bold text-red-700">Logout from SeriFusion</h4>
+                            <p class="text-xs text-red-500 font-medium">Securely end your active session on this device</p>
+                        </div>
+                    </div>
+                    <i class="ph ph-caret-right text-red-400"></i>
+                </button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -61,6 +194,16 @@
             } else {
                 document.querySelector('input[value="en"]').checked = true;
             }
+
+            // Load saved settings
+            document.getElementById('climateAlarmsToggle').checked = localStorage.getItem('climateAlarms') !== 'false';
+            document.getElementById('taskRemindersToggle').checked = localStorage.getItem('taskReminders') !== 'false';
+            document.getElementById('marketUpdatesToggle').checked = localStorage.getItem('marketUpdates') !== 'false';
+            
+            const tempUnit = localStorage.getItem('tempUnit') || 'C';
+            document.querySelector(`input[name="tempUnit"][value="${tempUnit}"]`).checked = true;
+            
+            document.getElementById('arduinoServerUrl').value = localStorage.getItem('arduinoServerUrl') || 'http://localhost:5000';
         });
 
         function setLanguage(lang) {
@@ -68,6 +211,24 @@
                 if (typeof translateToKannada === 'function') translateToKannada();
             } else {
                 if (typeof translateToEnglish === 'function') translateToEnglish();
+            }
+        }
+
+        function saveSetting(key, val) {
+            localStorage.setItem(key, val);
+        }
+
+        function clearAppData() {
+            if (confirm("Are you sure you want to clear application settings and cache? This resets language and configurations.")) {
+                localStorage.clear();
+                window.location.reload();
+            }
+        }
+
+        function logout() {
+            if (confirm("Are you sure you want to logout?")) {
+                localStorage.removeItem('farmerPhoto');
+                window.location.href = 'index.html';
             }
         }
     </script>
