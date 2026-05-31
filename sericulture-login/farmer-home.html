@@ -203,43 +203,252 @@
         </header>
 
         <div class="p-8 max-w-7xl mx-auto space-y-8">
-            <!-- Greeting & Hero Card -->
             <div class="animate-slide-up">
                 <h1 class="text-3xl font-extrabold text-mulberry-dark mb-1">Good Morning, <span id="hero-farmer-name">Ramesh</span>.</h1>
                 <p class="text-earthy/70 font-medium mb-6">Here is your farm's performance overview for today.</p>
 
-                <div class="relative overflow-hidden rounded-3xl hero-gradient p-8 text-white shadow-xl shadow-mulberry/20">
-                    <!-- Decorative background element -->
-                    <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-                    <div class="absolute bottom-0 left-0 w-40 h-40 bg-silkgold opacity-10 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4"></div>
+                <!-- biological growth stages horizontal selectors -->
+                <div class="mb-6 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm overflow-x-auto whitespace-nowrap custom-scrollbar flex gap-2">
+                    <button onclick="scrollToStage('incubation')" id="btn-incubation"
+                        class="stage-btn px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 border border-mulberry bg-mulberry/10 text-mulberry">
+                        <i class="ph ph-egg text-lg"></i>
+                        <span>Incubation</span>
+                    </button>
+                    <button onclick="scrollToStage('instar_1')" id="btn-instar_1"
+                        class="stage-btn px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 border border-transparent text-gray-600 hover:bg-gray-50">
+                        <i class="ph ph-bug text-lg"></i>
+                        <span>1st Instar</span>
+                    </button>
+                    <button onclick="scrollToStage('instar_2')" id="btn-instar_2"
+                        class="stage-btn px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 border border-transparent text-gray-600 hover:bg-gray-50">
+                        <i class="ph ph-bug text-lg"></i>
+                        <span>2nd Instar</span>
+                    </button>
+                    <button onclick="scrollToStage('instar_3')" id="btn-instar_3"
+                        class="stage-btn px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 border border-transparent text-gray-600 hover:bg-gray-50">
+                        <i class="ph ph-bug text-lg"></i>
+                        <span>3rd Instar</span>
+                    </button>
+                    <button onclick="scrollToStage('instar_4')" id="btn-instar_4"
+                        class="stage-btn px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 border border-transparent text-gray-600 hover:bg-gray-50">
+                        <i class="ph ph-bug text-lg"></i>
+                        <span>4th Instar</span>
+                    </button>
+                    <button onclick="scrollToStage('instar_5')" id="btn-instar_5"
+                        class="stage-btn px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 border border-transparent text-gray-600 hover:bg-gray-50">
+                        <i class="ph ph-bug text-lg"></i>
+                        <span>5th Instar</span>
+                    </button>
+                </div>
 
-                    <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
-                                <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-                                Active Cycle: Batch #402
-                            </div>
-                            <h2 class="text-4xl font-extrabold mb-2">4th Instar Stage</h2>
-                            <p class="text-white/80 max-w-md mb-6">The silkworms are rapidly growing. Peak feeding phase is active. Ensure temperature remains below 30°C.</p>
-                        </div>
-                        
-                        <div class="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-2xl min-w-[240px]">
-                            <div class="flex justify-between items-end mb-2">
-                                <span class="text-sm font-semibold text-white/80">Cycle Progress</span>
-                                <span class="text-2xl font-bold">Day 14</span>
-                            </div>
-                            <div class="w-full bg-black/20 rounded-full h-3 mb-2 overflow-hidden">
-                                <div class="bg-silkgold h-3 rounded-full relative" style="width: 60%">
-                                    <div class="absolute inset-0 bg-white/20 animate-pulse"></div>
+                <div class="flex overflow-x-auto gap-6 pb-4 snap-x snap-mandatory custom-scrollbar" id="stage-carousel">
+                    
+                    <!-- Incubation -->
+                    <div id="card-incubation" class="relative overflow-hidden rounded-3xl bg-gray-500 p-8 text-white shadow-xl flex-shrink-0 w-full lg:w-[85%] snap-center border border-white/10">
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+                        <div class="absolute bottom-0 left-0 w-40 h-40 bg-white opacity-5 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4"></div>
+                        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6 opacity-80">
+                            <div>
+                                <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+                                    <i class="ph ph-check-circle text-lg"></i>
+                                    Completed
                                 </div>
+                                <h2 class="text-4xl font-extrabold mb-2">Incubation Stage</h2>
+                                <p class="text-white/90 max-w-md mb-6">Eggs developing under strict temperature and humidity for uniform hatching.</p>
                             </div>
-                            <div class="flex justify-between text-xs text-white/60 font-medium">
-                                <span>Egg Hatching</span>
-                                <span>Spinning</span>
+                            <div class="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-2xl min-w-[240px]">
+                                <div class="flex justify-between items-end mb-2">
+                                    <span class="text-sm font-semibold text-white/80">Stage Progress</span>
+                                    <span class="text-2xl font-bold">100%</span>
+                                </div>
+                                <div class="w-full bg-black/20 rounded-full h-3 mb-2 overflow-hidden">
+                                    <div class="bg-gray-300 h-3 rounded-full relative" style="width: 100%"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-white/60 font-medium">
+                                    <span>Start</span>
+                                    <span>Hatched</span>
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- 1st Instar -->
+                    <div id="card-instar_1" class="relative overflow-hidden rounded-3xl bg-gray-500 p-8 text-white shadow-xl flex-shrink-0 w-full lg:w-[85%] snap-center border border-white/10">
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+                        <div class="absolute bottom-0 left-0 w-40 h-40 bg-white opacity-5 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4"></div>
+                        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6 opacity-80">
+                            <div>
+                                <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+                                    <i class="ph ph-check-circle text-lg"></i>
+                                    Completed
+                                </div>
+                                <h2 class="text-4xl font-extrabold mb-2">1st Instar Stage</h2>
+                                <p class="text-white/90 max-w-md mb-6">Newly hatched larvae fed with tender chopped mulberry leaves (Chowki).</p>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-2xl min-w-[240px]">
+                                <div class="flex justify-between items-end mb-2">
+                                    <span class="text-sm font-semibold text-white/80">Stage Progress</span>
+                                    <span class="text-2xl font-bold">100%</span>
+                                </div>
+                                <div class="w-full bg-black/20 rounded-full h-3 mb-2 overflow-hidden">
+                                    <div class="bg-gray-300 h-3 rounded-full relative" style="width: 100%"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-white/60 font-medium">
+                                    <span>Hatching</span>
+                                    <span>Moulting</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2nd Instar -->
+                    <div id="card-instar_2" class="relative overflow-hidden rounded-3xl bg-gray-500 p-8 text-white shadow-xl flex-shrink-0 w-full lg:w-[85%] snap-center border border-white/10">
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+                        <div class="absolute bottom-0 left-0 w-40 h-40 bg-white opacity-5 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4"></div>
+                        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6 opacity-80">
+                            <div>
+                                <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+                                    <i class="ph ph-check-circle text-lg"></i>
+                                    Completed
+                                </div>
+                                <h2 class="text-4xl font-extrabold mb-2">2nd Instar Stage</h2>
+                                <p class="text-white/90 max-w-md mb-6">Continued growth of Chowki worms with strict hygiene maintenance.</p>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-2xl min-w-[240px]">
+                                <div class="flex justify-between items-end mb-2">
+                                    <span class="text-sm font-semibold text-white/80">Stage Progress</span>
+                                    <span class="text-2xl font-bold">100%</span>
+                                </div>
+                                <div class="w-full bg-black/20 rounded-full h-3 mb-2 overflow-hidden">
+                                    <div class="bg-gray-300 h-3 rounded-full relative" style="width: 100%"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-white/60 font-medium">
+                                    <span>Moulting</span>
+                                    <span>Moulting</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3rd Instar -->
+                    <div id="card-instar_3" class="relative overflow-hidden rounded-3xl bg-gray-500 p-8 text-white shadow-xl flex-shrink-0 w-full lg:w-[85%] snap-center border border-white/10">
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+                        <div class="absolute bottom-0 left-0 w-40 h-40 bg-white opacity-5 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4"></div>
+                        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6 opacity-80">
+                            <div>
+                                <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+                                    <i class="ph ph-check-circle text-lg"></i>
+                                    Completed
+                                </div>
+                                <h2 class="text-4xl font-extrabold mb-2">3rd Instar Stage</h2>
+                                <p class="text-white/90 max-w-md mb-6">Transition to late age. Larvae require more bed space and whole leaves.</p>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-2xl min-w-[240px]">
+                                <div class="flex justify-between items-end mb-2">
+                                    <span class="text-sm font-semibold text-white/80">Stage Progress</span>
+                                    <span class="text-2xl font-bold">100%</span>
+                                </div>
+                                <div class="w-full bg-black/20 rounded-full h-3 mb-2 overflow-hidden">
+                                    <div class="bg-gray-300 h-3 rounded-full relative" style="width: 100%"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-white/60 font-medium">
+                                    <span>Moulting</span>
+                                    <span>Moulting</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4th Instar -->
+                    <div id="card-instar_4" class="relative overflow-hidden rounded-3xl hero-gradient p-8 text-white shadow-xl shadow-mulberry/20 flex-shrink-0 w-full lg:w-[85%] snap-center">
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+                        <div class="absolute bottom-0 left-0 w-40 h-40 bg-silkgold opacity-10 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4"></div>
+                        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            <div>
+                                <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+                                    <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                                    Active Cycle: Batch #402
+                                </div>
+                                <h2 class="text-4xl font-extrabold mb-2">4th Instar Stage</h2>
+                                <p class="text-white/80 max-w-md mb-6">The silkworms are rapidly growing. Peak feeding phase is active. Ensure temperature remains below 30°C.</p>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-2xl min-w-[240px]">
+                                <div class="flex justify-between items-end mb-2">
+                                    <span class="text-sm font-semibold text-white/80">Cycle Progress</span>
+                                    <span class="text-2xl font-bold">Day 14</span>
+                                </div>
+                                <div class="w-full bg-black/20 rounded-full h-3 mb-2 overflow-hidden">
+                                    <div class="bg-silkgold h-3 rounded-full relative" style="width: 60%">
+                                        <div class="absolute inset-0 bg-white/20 animate-pulse"></div>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between text-xs text-white/60 font-medium">
+                                    <span>Egg Hatching</span>
+                                    <span>Spinning</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5th Instar -->
+                    <div id="card-instar_5" class="relative overflow-hidden rounded-3xl bg-gray-400 p-8 text-white shadow-xl flex-shrink-0 w-full lg:w-[85%] snap-center border border-white/10">
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+                        <div class="absolute bottom-0 left-0 w-40 h-40 bg-white opacity-5 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4"></div>
+                        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6 opacity-70">
+                            <div>
+                                <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+                                    <i class="ph ph-hourglass text-lg"></i>
+                                    Upcoming
+                                </div>
+                                <h2 class="text-4xl font-extrabold mb-2">5th Instar Stage</h2>
+                                <p class="text-white/90 max-w-md mb-6">Final and longest feeding stage. Maximum leaf consumption before spinning.</p>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-2xl min-w-[240px]">
+                                <div class="flex justify-between items-end mb-2">
+                                    <span class="text-sm font-semibold text-white/80">Stage Progress</span>
+                                    <span class="text-2xl font-bold">0%</span>
+                                </div>
+                                <div class="w-full bg-black/20 rounded-full h-3 mb-2 overflow-hidden">
+                                    <div class="bg-gray-300 h-3 rounded-full relative" style="width: 0%"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-white/60 font-medium">
+                                    <span>Moulting</span>
+                                    <span>Spinning</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        setTimeout(() => {
+                            const activeCard = document.getElementById('card-instar_4'); // 4th instar is currently active
+                            if(activeCard) {
+                                activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                            }
+                        }, 100);
+                    });
+
+                    function scrollToStage(stageId) {
+                        const card = document.getElementById('card-' + stageId);
+                        if(card) {
+                            card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                            
+                            // update active button styles
+                            document.querySelectorAll('.stage-btn').forEach(btn => {
+                                btn.classList.remove('border-mulberry', 'bg-mulberry/10', 'text-mulberry');
+                                btn.classList.add('border-transparent', 'text-gray-600', 'hover:bg-gray-50');
+                            });
+                            const activeBtn = document.getElementById('btn-' + stageId);
+                            if(activeBtn) {
+                                activeBtn.classList.remove('border-transparent', 'text-gray-600', 'hover:bg-gray-50');
+                                activeBtn.classList.add('border-mulberry', 'bg-mulberry/10', 'text-mulberry');
+                            }
+                        }
+                    }
+                </script>
             </div>
 
             <!-- Quick Stats Grid -->

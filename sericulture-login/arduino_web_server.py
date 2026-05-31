@@ -25,6 +25,8 @@ latest_data = {
     "airHumidity": -999,
     "soilMoisture": 0,
     "soilRaw": 0,
+    "soilTemp": -999,
+    "ds18b20OK": False,
     "dhtOK": False,
     "timestamp": 0,
     "lastUpdate": "Never"
@@ -89,144 +91,245 @@ def read_serial_data():
 # ═══════════════════════════════════════════════════
 HTML_TEMPLATE = '''
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Arduino Sensor Dashboard</title>
+    <meta charset="UTF-8">
+    <title>SeriFusion - Local Arduino Server</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #f5f7f3;
+            --surface: #ffffff;
+            --card: rgba(255, 255, 255, 0.85);
+            --border: rgba(87, 99, 65, 0.15);
+            --text: #2d3320;
+            --muted: #687550;
+            --green: #576341;
+            --green-light: #a8b58d;
+            --yellow: #d4af37;
+            --red: #c94c4c;
+            --blue: #4c85c9;
+            --teal: #3c4727;
+            --accent: #576341;
+            --shadow: 0 4px 24px -8px rgba(87, 99, 65, 0.08);
+            --shadow-hover: 0 16px 32px -12px rgba(87, 99, 65, 0.2);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Manrope', sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            padding: 20px;
+            padding: 30px;
+            display: flex;
+            justify-content: center;
         }
-        .container { max-width: 900px; margin: 0 auto; }
-        h1 {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        .container { 
+            width: 100%;
+            max-width: 900px; 
+            animation: fadeIn 0.8s ease-out forwards;
         }
-        .status-bar {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            border: 2px solid rgba(255,255,255,0.2);
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            background: var(--card);
+            backdrop-filter: blur(12px);
+            padding: 20px 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
         }
-        .section {
-            background: white;
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header-icon {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, var(--green), var(--teal));
             border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            display: flex; align-items: center; justify-content: center;
+            color: white;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(87, 99, 65, 0.25);
         }
-        .section h2 {
-            color: #333;
-            margin-bottom: 20px;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 12px;
-        }
-        .sensor-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        @media (max-width: 768px) {
-            .sensor-row { grid-template-columns: 1fr; }
-        }
-        .sensor {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            padding: 20px;
-            border-radius: 8px;
-            border-left: 5px solid #667eea;
-        }
-        .sensor-label {
-            font-size: 11px;
-            color: #999;
+        h1 { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.3px; color: var(--text); }
+        .subtitle { font-size: 0.8rem; color: var(--muted); margin-top: 4px; font-weight: 500; }
+        
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            background: rgba(87, 99, 65, 0.1);
+            color: var(--green);
+            border: 1px solid rgba(87, 99, 65, 0.2);
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        .dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--green);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%,100%{opacity:1; box-shadow: 0 0 0 0 rgba(87,99,65,0.4);} 50%{opacity:0.6; box-shadow: 0 0 0 4px rgba(87,99,65,0);} }
+
+        .section {
+            margin-bottom: 24px;
+        }
+        .section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: var(--card-accent, var(--green));
+        }
+
+        .sensor-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--muted);
             font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .sensor-value-container {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
         }
         .sensor-value {
-            font-size: 40px;
-            font-weight: bold;
-            color: #333;
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1;
+            letter-spacing: -1px;
         }
-        .sensor-unit {
-            font-size: 16px;
-            color: #999;
-            margin-left: 5px;
-        }
+        .sensor-unit { font-size: 1.2rem; color: var(--muted); font-weight: 600; }
+        
         .status {
-            display: inline-block;
-            padding: 4px 12px;
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 4px 10px;
             border-radius: 20px;
             font-size: 11px;
-            font-weight: bold;
+            font-weight: 700;
             text-transform: uppercase;
-            margin-top: 8px;
+            letter-spacing: 0.5px;
+            margin-top: 16px;
         }
-        .status.ok { background: #d4edda; color: #155724; }
-        .status.error { background: #f8d7da; color: #721c24; }
-        .status.warning { background: #fff3cd; color: #856404; }
-        .progress-bar {
-            width: 100%;
-            height: 35px;
-            background: #e9ecef;
-            border-radius: 20px;
-            overflow: hidden;
-            margin-top: 12px;
-            border: 2px solid #667eea;
+        .status.ok { background: rgba(87,99,65,0.12); color: var(--green); border: 1px solid rgba(87,99,65,0.25); }
+        .status.error { background: rgba(201,76,76,0.12); color: var(--red); border: 1px solid rgba(201,76,76,0.25); }
+        .status.warning { background: rgba(212,175,55,0.12); color: var(--yellow); border: 1px solid rgba(212,175,55,0.25); }
+
+        .progress-track {
+            width: 100%; height: 8px;
+            background: rgba(87, 99, 65, 0.1);
+            border-radius: 10px; margin-top: 20px; overflow: hidden;
         }
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
+            border-radius: 10px;
+            background: linear-gradient(90deg, var(--green-light), var(--green));
             transition: width 0.5s ease;
         }
+
+        .system-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px 24px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--blue);
+        }
+        .system-info strong { font-size: 14px; color: var(--text); display: block; margin-bottom: 4px; }
+        .system-info span { font-size: 12px; color: var(--muted); }
+
         .timestamp {
             text-align: center;
-            color: #999;
+            color: var(--muted);
             font-size: 12px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
+            font-weight: 600;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 600px) {
+            .header { flex-direction: column; align-items: flex-start; gap: 16px; }
+            .grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🌿 Arduino Sensor Dashboard</h1>
         
-        <div class="status-bar">
-            🟢 Live Data <span id="lastUpdate">(updating...)</span>
+        <div class="header">
+            <div class="header-title">
+                <div class="header-icon"><i class="ph ph-cpu"></i></div>
+                <div>
+                    <h1>Local Arduino Server</h1>
+                    <div class="subtitle">Live Sensor Dashboard</div>
+                </div>
+            </div>
+            <div class="status-badge">
+                <span class="dot"></span> Live Data: <span id="lastUpdate" style="margin-left:4px">--:--:--</span>
+            </div>
         </div>
 
         <div class="section">
-            <h2>🏠 Air Conditions</h2>
-            <div class="sensor-row">
-                <div class="sensor">
-                    <div class="sensor-label">Temperature</div>
-                    <div class="sensor-value">
-                        <span id="airTemp">--</span>
+            <div class="section-title"><i class="ph ph-wind"></i> Air Conditions</div>
+            <div class="grid">
+                <div class="card" style="--card-accent: var(--blue)">
+                    <div class="sensor-label">Air Temperature</div>
+                    <div class="sensor-value-container">
+                        <span class="sensor-value" id="airTemp">--</span>
                         <span class="sensor-unit">°C</span>
                     </div>
                     <div id="airTempStatus" class="status">--</div>
                 </div>
-                <div class="sensor">
+                <div class="card" style="--card-accent: var(--teal)">
                     <div class="sensor-label">Humidity</div>
-                    <div class="sensor-value">
-                        <span id="airHum">--</span>
+                    <div class="sensor-value-container">
+                        <span class="sensor-value" id="airHum">--</span>
                         <span class="sensor-unit">%</span>
                     </div>
                     <div id="airHumStatus" class="status">--</div>
@@ -235,34 +338,43 @@ HTML_TEMPLATE = '''
         </div>
 
         <div class="section">
-            <h2>🌱 Soil Conditions</h2>
-            <div class="sensor-row">
-                <div class="sensor">
+            <div class="section-title"><i class="ph ph-plant"></i> Soil Conditions</div>
+            <div class="grid">
+                <div class="card" style="--card-accent: var(--yellow)">
                     <div class="sensor-label">Soil Moisture</div>
-                    <div class="sensor-value">
-                        <span id="soilMoist">--</span>
+                    <div class="sensor-value-container">
+                        <span class="sensor-value" id="soilMoist">--</span>
                         <span class="sensor-unit">%</span>
                     </div>
                     <div id="soilMoistStatus" class="status">--</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="moistBar" style="width: 0%;">
-                            <span id="moistPercent">0%</span>
-                        </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="moistBar" style="width: 0%;"></div>
                     </div>
+                </div>
+                <div class="card" style="--card-accent: var(--green)">
+                    <div class="sensor-label">Soil Temperature</div>
+                    <div class="sensor-value-container">
+                        <span class="sensor-value" id="soilTemp">--</span>
+                        <span class="sensor-unit">°C</span>
+                    </div>
+                    <div id="soilTempStatus" class="status">--</div>
                 </div>
             </div>
         </div>
 
         <div class="section">
-            <h2>⚙️ System</h2>
-            <div style="padding: 15px; background: #f8f9fa; border-radius: 8px;">
-                <strong>DHT22 Sensor:</strong>
-                <div id="dhtStatus" class="status" style="display: block; margin-top: 8px;">--</div>
+            <div class="section-title"><i class="ph ph-gear"></i> System Status</div>
+            <div class="system-card">
+                <div class="system-info">
+                    <strong>DHT22 Sensor Connection</strong>
+                    <span>Hardware status monitoring</span>
+                </div>
+                <div id="dhtStatus" class="status">--</div>
             </div>
         </div>
 
         <div class="timestamp">
-            Last update: <span id="timestamp">Never</span>
+            Last server update: <span id="timestamp">Never</span>
         </div>
     </div>
 
@@ -283,29 +395,39 @@ HTML_TEMPLATE = '''
                     updateStatus('soilMoist', data.soilMoisture, 40, 70, true);
 
                     document.getElementById('moistBar').style.width = data.soilMoisture + '%';
-                    document.getElementById('moistPercent').textContent = data.soilMoisture + '%';
 
-                    document.getElementById('dhtStatus').textContent = 
-                        data.dhtOK ? '✓ Connected' : '✗ Disconnected';
-                    document.getElementById('dhtStatus').className = 
-                        'status ' + (data.dhtOK ? 'ok' : 'error');
+                    const soilTempVal = data.soilTemp !== undefined ? data.soilTemp : (data.ds18b20Temp !== undefined ? data.ds18b20Temp : (data.ds18b20 !== undefined ? data.ds18b20 : null));
+                    const hasSoilTemp = soilTempVal !== null;
+                    const ds18b20Ok = data.ds18b20OK !== false && hasSoilTemp;
+                    
+                    if (hasSoilTemp) {
+                        document.getElementById('soilTemp').textContent = soilTempVal.toFixed(1);
+                        updateStatus('soilTemp', soilTempVal, 15, 30, ds18b20Ok);
+                    } else {
+                        document.getElementById('soilTemp').textContent = 'ERR';
+                        updateStatus('soilTemp', -999, 15, 30, false);
+                    }
+
+                    const dhtStat = document.getElementById('dhtStatus');
+                    dhtStat.innerHTML = data.dhtOK ? '<i class="ph ph-check-circle"></i> Connected' : '<i class="ph ph-x-circle"></i> Disconnected';
+                    dhtStat.className = 'status ' + (data.dhtOK ? 'ok' : 'error');
 
                     document.getElementById('timestamp').textContent = data.lastUpdate;
                     document.getElementById('lastUpdate').textContent = data.lastUpdate;
                 })
-                .catch(e => console.error(e));
+                .catch(e => console.error('Error fetching data:', e));
         }
 
         function updateStatus(id, value, min, max, ok) {
             const elem = document.getElementById(id + 'Status');
             if (!ok) {
-                elem.textContent = '✗ ERROR';
+                elem.innerHTML = '<i class="ph ph-warning-circle"></i> ERROR';
                 elem.className = 'status error';
             } else if (value < min || value > max) {
-                elem.textContent = value < min ? '↓ LOW' : '↑ HIGH';
+                elem.innerHTML = value < min ? '<i class="ph ph-arrow-down"></i> LOW' : '<i class="ph ph-arrow-up"></i> HIGH';
                 elem.className = 'status warning';
             } else {
-                elem.textContent = '✓ OK';
+                elem.innerHTML = '<i class="ph ph-check-circle"></i> OK';
                 elem.className = 'status ok';
             }
         }
