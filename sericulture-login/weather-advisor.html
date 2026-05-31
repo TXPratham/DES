@@ -77,7 +77,7 @@
                             </div>
                             <div>
                                 <p class="text-xs font-bold text-gray-400 uppercase">Temperature</p>
-                                <p class="font-extrabold text-2xl text-red-600">35.2°C <span class="text-xs text-red-500 ml-1">↑ High</span></p>
+                                <p class="font-extrabold text-2xl text-red-600" id="current-temp">--°C</p>
                             </div>
                         </div>
                     </div>
@@ -89,7 +89,7 @@
                             </div>
                             <div>
                                 <p class="text-xs font-bold text-gray-400 uppercase">Humidity</p>
-                                <p class="font-extrabold text-2xl text-gray-800">42% <span class="text-xs text-orange-500 ml-1">↓ Low</span></p>
+                                <p class="font-extrabold text-2xl text-gray-800" id="current-humidity">--%</p>
                             </div>
                         </div>
                     </div>
@@ -209,7 +209,15 @@
 
     </main>
     <script>
+        const API_KEY = 'f5a20e0bd5a49278df8b2e0ee4516af3';
+        const CITY = 'Ramanagara,IN';
+        
+        let currentTemp = 0;
+        let currentHumidity = 0;
+
         document.addEventListener('DOMContentLoaded', () => {
+            fetchWeatherData();
+
             const enableVoiceBtn = document.getElementById('enable-voice-btn');
             let voiceEnabled = false;
 
@@ -232,35 +240,27 @@
             function triggerVoiceAlert() {
                 if (!voiceEnabled || !('speechSynthesis' in window)) return;
                 
-                // Read from DOM (simulated real-time data)
-                const temp = 35.2; 
-                const humidity = 42;
-                
                 const currentLang = localStorage.getItem('selectedLanguage') || 'en';
 
                 let message = "";
                 
-                if (temp > 34) {
+                if (currentTemp > 34) {
                     if (currentLang === 'kn') {
                         message = "ಗಮನಿಸಿ. ತಾಪಮಾನ 34 ಡಿಗ್ರಿ ಮೀರಿದೆ. ಚಾಕಿ ಹುಳುಗಳಿಗೆ ಇದು ಸೂಕ್ತವಲ್ಲ. ದಯವಿಟ್ಟು ತಂಪಾಗಿಸುವ ಕ್ರಮಗಳನ್ನು ಕೈಗೊಳ್ಳಿ.";
                     } else {
-                        message = "Critical Alert. Temperature has exceeded 34 degrees celsius. This is unsuitable for Chawki rearing. Please implement cooling measures.";
+                        message = `Critical Alert. Temperature is ${currentTemp.toFixed(1)} degrees celsius. This is unsuitable for rearing. Please implement cooling measures.`;
                     }
-                } else if (humidity < 50) {
+                } else if (currentHumidity < 50) {
                      if (currentLang === 'kn') {
-                        message = "ಗಮನಿಸಿ. ಆರ್ದ್ರತೆ ಶೇಕಡಾ 50 ಕ್ಕಿಂತ ಕಡಿಮೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ಆರ್ದ್ರತೆಯನ್ನು ಹೆಚ್ಚಿಸಲು ಕ್ರಮಗಳನ್ನು ಕೈಗೊಳ್ಳಿ.";
+                        message = `ಗಮನಿಸಿ. ಆರ್ದ್ರತೆ ಶೇಕಡಾ 50 ಕ್ಕಿಂತ ಕಡಿಮೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ಆರ್ದ್ರತೆಯನ್ನು ಹೆಚ್ಚಿಸಲು ಕ್ರಮಗಳನ್ನು ಕೈಗೊಳ್ಳಿ.`;
                     } else {
-                        message = "Alert. Humidity is below 50 percent. Please take measures to increase humidity.";
+                        message = `Alert. Humidity is ${currentHumidity} percent. Please take measures to increase humidity.`;
                     }
                 }
                 
                 if (message) {
                     const utterance = new SpeechSynthesisUtterance(message);
-                    if (currentLang === 'kn') {
-                        utterance.lang = 'kn-IN';
-                    } else {
-                        utterance.lang = 'en-IN'; 
-                    }
+                    utterance.lang = currentLang === 'kn' ? 'kn-IN' : 'en-IN'; 
                     utterance.rate = 0.9;
                     window.speechSynthesis.speak(utterance);
                 }
@@ -270,6 +270,152 @@
                 if(voiceEnabled) triggerVoiceAlert();
             }, 30000);
         });
+
+        async function fetchWeatherData() {
+            try {
+                const currentRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${CITY}&appid=${API_KEY}&units=metric`);
+                const currentData = await currentRes.json();
+                
+                const forecastRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${CITY}&appid=${API_KEY}&units=metric`);
+                const forecastData = await forecastRes.json();
+
+                updateCurrentWeatherUI(currentData);
+                updateForecastUI(forecastData);
+                updateAlerts(currentData);
+            } catch (error) {
+                console.error("Error fetching weather data:", error);
+            }
+        }
+
+        function updateCurrentWeatherUI(data) {
+            currentTemp = data.main.temp;
+            currentHumidity = data.main.humidity;
+            
+            const tempEl = document.getElementById('current-temp');
+            const humEl = document.getElementById('current-humidity');
+            const windEl = document.getElementById('current-wind');
+            
+            let tempStatus = '';
+            if (currentTemp > 34) tempStatus = '<span class="text-xs text-red-500 ml-1">↑ High</span>';
+            else if (currentTemp < 20) tempStatus = '<span class="text-xs text-blue-500 ml-1">↓ Low</span>';
+            else tempStatus = '<span class="text-xs text-green-500 ml-1">✓ Good</span>';
+            
+            let humStatus = '';
+            if (currentHumidity < 50) humStatus = '<span class="text-xs text-orange-500 ml-1">↓ Low</span>';
+            else if (currentHumidity > 85) humStatus = '<span class="text-xs text-red-500 ml-1">↑ High</span>';
+            else humStatus = '<span class="text-xs text-green-500 ml-1">✓ Good</span>';
+            
+            tempEl.innerHTML = `${currentTemp.toFixed(1)}°C ${tempStatus}`;
+            humEl.innerHTML = `${currentHumidity}% ${humStatus}`;
+            windEl.innerHTML = `${data.wind.speed} m/s`;
+            
+            // Text color based on temp
+            tempEl.className = `font-extrabold text-2xl ${currentTemp > 34 ? 'text-red-600' : (currentTemp < 20 ? 'text-blue-600' : 'text-green-600')}`;
+        }
+        
+        function updateAlerts(data) {
+            const alertContainer = document.getElementById('alert-container');
+            const alertTitle = document.getElementById('alert-title');
+            const alertDesc = document.getElementById('alert-desc');
+            const alertSuggestion = document.getElementById('alert-suggestion');
+            
+            const temp = data.main.temp;
+            const hum = data.main.humidity;
+            
+            if (temp > 34) {
+                alertContainer.className = "bg-red-50 border-l-4 border-red-500 p-5 rounded-r-xl shadow-sm mb-8 flex gap-4 items-start animate-pulse";
+                alertTitle.className = "text-red-800 font-bold text-lg";
+                alertTitle.innerText = "CRITICAL ALERT: Heatwave Expected";
+                alertDesc.className = "text-red-600 text-sm mt-1 font-medium";
+                alertDesc.innerText = `Temperatures are currently ${temp.toFixed(1)}°C. This is highly unsuitable for Chawki rearing.`;
+                alertSuggestion.innerHTML = `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-red-700 shadow-sm border border-red-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    AI Suggestion: Delay crop start (brushing) or implement active cooling immediately.
+                </span>`;
+            } else if (hum < 50) {
+                alertContainer.className = "bg-orange-50 border-l-4 border-orange-500 p-5 rounded-r-xl shadow-sm mb-8 flex gap-4 items-start animate-pulse";
+                alertTitle.className = "text-orange-800 font-bold text-lg";
+                alertTitle.innerText = "WARNING: Low Humidity";
+                alertDesc.className = "text-orange-600 text-sm mt-1 font-medium";
+                alertDesc.innerText = `Humidity is currently ${hum}%. Leaves will wither faster.`;
+                alertSuggestion.innerHTML = `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-orange-700 shadow-sm border border-orange-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    AI Suggestion: Hang wet gunny bags on doors/windows and sprinkle water.
+                </span>`;
+            } else {
+                alertContainer.className = "bg-green-50 border-l-4 border-green-500 p-5 rounded-r-xl shadow-sm mb-8 flex gap-4 items-start";
+                alertTitle.className = "text-green-800 font-bold text-lg";
+                alertTitle.innerText = "WEATHER OPTIMAL";
+                alertDesc.className = "text-green-600 text-sm mt-1 font-medium";
+                alertDesc.innerText = `Current conditions (${temp.toFixed(1)}°C, ${hum}%) are suitable for rearing.`;
+                alertSuggestion.innerHTML = `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-green-700 shadow-sm border border-green-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    AI Suggestion: Continue standard feeding and rearing practices.
+                </span>`;
+            }
+        }
+        
+        function updateForecastUI(data) {
+            const container = document.getElementById('forecast-container');
+            container.innerHTML = '';
+            
+            // Get unique days (1 forecast per day, e.g., around 12:00 PM)
+            const dailyData = {};
+            data.list.forEach(item => {
+                const date = new Date(item.dt * 1000);
+                const day = date.toLocaleDateString('en-US', { weekday: 'short' });
+                // Prefer afternoon reading or just first reading of the day
+                if (!dailyData[day]) {
+                    dailyData[day] = item;
+                } else if (date.getHours() === 11 || date.getHours() === 14) {
+                    dailyData[day] = item;
+                }
+            });
+            
+            const days = Object.keys(dailyData).slice(0, 5); // 5 days max
+            
+            days.forEach((day, index) => {
+                const item = dailyData[day];
+                const temp = item.main.temp;
+                const minTemp = item.main.temp_min;
+                const weatherIcon = item.weather[0].icon;
+                
+                let suitabilityClass = '';
+                let suitabilityText = '';
+                let borderClass = '';
+                let bgClass = '';
+                
+                if (temp > 34 || temp < 18) {
+                    suitabilityClass = 'bg-red-100 text-red-700';
+                    suitabilityText = 'Unsuitable';
+                    borderClass = 'border-red-200';
+                    bgClass = 'bg-red-50';
+                } else if (temp > 30 || temp < 22) {
+                    suitabilityClass = 'bg-yellow-100 text-yellow-700';
+                    suitabilityText = 'Moderate';
+                    borderClass = 'border-yellow-200';
+                    bgClass = 'bg-yellow-50';
+                } else {
+                    suitabilityClass = 'bg-green-100 text-green-700';
+                    suitabilityText = 'Optimal';
+                    borderClass = 'border-green-200';
+                    bgClass = 'bg-green-50';
+                }
+                
+                const dayName = index === 0 ? 'Today' : (index === 1 ? 'Tomorrow' : day);
+                
+                const card = document.createElement('div');
+                card.className = `w-32 p-4 rounded-xl border ${borderClass} ${bgClass} text-center flex flex-col items-center`;
+                card.innerHTML = `
+                    <p class="text-xs font-bold text-gray-500 uppercase">${dayName}</p>
+                    <img src="https://openweathermap.org/img/wn/${weatherIcon}@2x.png" alt="weather icon" class="w-12 h-12 my-1">
+                    <p class="font-bold text-gray-800 text-lg">${Math.round(temp)}° / ${Math.round(minTemp)}°</p>
+                    <span class="mt-2 text-[10px] font-bold ${suitabilityClass} px-2 py-1 rounded">${suitabilityText}</span>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
     </script>
 </body>
 </html>
